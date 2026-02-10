@@ -1,0 +1,3184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e9ecef;
+            padding: 10px 20px;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #495057;
+        }
+
+        .tab-btn:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .asset-breakdown-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .asset-breakdown-cards {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .asset-breakdown-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .asset-breakdown-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .card .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .positive {
+            color: #28a745;
+        }
+
+        .negative {
+            color: #dc3545;
+        }
+
+        .asset-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .asset-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .asset-card h4 {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .asset-card .amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .asset-card .percentage {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            padding: 25px;
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+        }
+
+        .stat-icon {
+            font-size: 48px;
+            opacity: 0.9;
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .stat-subtext {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .asset-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            padding: 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .asset-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .asset-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .asset-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25);
+            transform: translateY(-3px);
+        }
+
+        .asset-card h4 {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .asset-card .amount {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .asset-card .percentage {
+            font-size: 13px;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .asset-card .percentage::before {
+            content: '📊';
+            font-size: 14px;
+        }
+
+        #importStatus {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 3% auto;
+            padding: 30px;
+            border: 1px solid #888;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h2 {
+            color: #495057;
+            margin: 0;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+            margin: 2px;
+        }
+
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 14px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .save-icon {
+            animation: spin 0.5s ease;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                width: 100%;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .auto-save-indicator {
+                bottom: 10px;
+                right: 10px;
+                font-size: 12px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💼 Portfolio Manager</h1>
+            <p>Track Your Investments & Financial Goals</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('dashboard')">📊 Dashboard</button>
+            <button class="tab-btn" onclick="showTab('fd')">🏦 Fixed Deposits</button>
+            <button class="tab-btn" onclick="showTab('rd')">💰 Recurring Deposits</button>
+            <button class="tab-btn" onclick="showTab('stock')">📈 Stocks</button>
+            <button class="tab-btn" onclick="showTab('mf')">📊 Mutual Funds</button>
+            <button class="tab-btn" onclick="showTab('gold')">🥇 Gold</button>
+            <button class="tab-btn" onclick="showTab('silver')">🥈 Silver</button>
+            <button class="tab-btn" onclick="showTab('crypto')">₿ Cryptocurrency</button>
+            <button class="tab-btn" onclick="showTab('insurance')">🛡️ Insurance</button>
+            <button class="tab-btn" onclick="showTab('income')">💵 Income</button>
+            <button class="tab-btn" onclick="showTab('import-export')">⚙️ Import/Export</button>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h2 style="margin-bottom: 25px; color: #2c3e50; font-size: 28px;">📊 Portfolio Overview</h2>
+                
+                <div class="summary-cards">
+                    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h3>💰 Total Invested</h3>
+                        <div class="value" id="totalInvested">₹0</div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h3>📈 Current Value</h3>
+                        <div class="value" id="currentValue">₹0</div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <h3>💵 Total P&L</h3>
+                        <div class="value" id="totalPL">₹0</div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <h3>💸 Monthly Income</h3>
+                        <div class="value" id="monthlyIncome">₹0</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 30px 0 15px 0; color: #2c3e50; font-size: 22px;">🎯 Asset Breakdown</h3>
+                <div class="asset-breakdown-cards" id="assetBreakdown">
+                    <!-- Dynamic asset cards will be inserted here -->
+                </div>
+
+                <h3 style="margin: 30px 0 15px 0; color: #2c3e50; font-size: 22px;">📊 Portfolio Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total Assets</div>
+                            <div class="stat-value" id="totalAssets">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                        <div class="stat-icon">🏆</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Best Performer</div>
+                            <div class="stat-value" id="bestPerformer">-</div>
+                            <div class="stat-subtext" id="bestPerformerReturn">-</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <div class="stat-icon">📉</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Worst Performer</div>
+                            <div class="stat-value" id="worstPerformer">-</div>
+                            <div class="stat-subtext" id="worstPerformerReturn">-</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                        <div class="stat-icon">💎</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Avg. Return</div>
+                            <div class="stat-value" id="avgReturn">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Deposit Tab -->
+            <div id="fd" class="tab-content">
+                <h2>Fixed Deposits</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Bank Name</label>
+                        <input type="text" id="fdBank" placeholder="Enter bank name">
+                    </div>
+                    <div class="form-group">
+                        <label>Principal Amount (₹)</label>
+                        <input type="number" id="fdPrincipal" placeholder="10000">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" step="0.01" id="fdRate" placeholder="6.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Tenure (Months)</label>
+                        <input type="number" id="fdTenure" placeholder="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="fdStartDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addFD()">Add FD</button>
+                
+                <div class="table-container">
+                    <table id="fdTable">
+                        <thead>
+                            <tr>
+                                <th>Bank</th>
+                                <th>Principal</th>
+                                <th>Rate %</th>
+                                <th>Tenure</th>
+                                <th>Start Date</th>
+                                <th>Maturity Date</th>
+                                <th>Maturity Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recurring Deposit Tab -->
+            <div id="rd" class="tab-content">
+                <h2>Recurring Deposits</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Bank Name</label>
+                        <input type="text" id="rdBank" placeholder="Enter bank name">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Deposit (₹)</label>
+                        <input type="number" id="rdMonthly" placeholder="5000">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" step="0.01" id="rdRate" placeholder="6.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Tenure (Months)</label>
+                        <input type="number" id="rdTenure" placeholder="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="rdStartDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addRD()">Add RD</button>
+                
+                <div class="table-container">
+                    <table id="rdTable">
+                        <thead>
+                            <tr>
+                                <th>Bank</th>
+                                <th>Monthly</th>
+                                <th>Rate %</th>
+                                <th>Tenure</th>
+                                <th>Start Date</th>
+                                <th>Maturity Date</th>
+                                <th>Maturity Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Stock Tab -->
+            <div id="stock" class="tab-content">
+                <h2>Stocks</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Stock Name</label>
+                        <input type="text" id="stockName" placeholder="Enter stock name">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="stockQty" placeholder="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="stockInvested" placeholder="10000">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="stockCurrent" placeholder="12000">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="stockDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addStock()">Add Stock</button>
+                
+                <div class="table-container">
+                    <table id="stockTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Invested</th>
+                                <th>Current</th>
+                                <th>P&L</th>
+                                <th>P&L %</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Mutual Fund Tab -->
+            <div id="mf" class="tab-content">
+                <h2>Mutual Funds</h2>
+                
+                <h3 style="margin-top: 20px;">Lumpsum Investments</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Scheme Name</label>
+                        <input type="text" id="mfLumpsumName" placeholder="Enter scheme name">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="mfLumpsumInvested" placeholder="50000">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="mfLumpsumCurrent" placeholder="55000">
+                    </div>
+                    <div class="form-group">
+                        <label>Investment Date</label>
+                        <input type="date" id="mfLumpsumDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addMFLumpsum()">Add Lumpsum</button>
+                
+                <div class="table-container">
+                    <table id="mfLumpsumTable">
+                        <thead>
+                            <tr>
+                                <th>Scheme</th>
+                                <th>Invested</th>
+                                <th>Current</th>
+                                <th>P&L</th>
+                                <th>P&L %</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <h3 style="margin-top: 30px;">SIP Investments</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Scheme Name</label>
+                        <input type="text" id="mfSIPName" placeholder="Enter scheme name">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly SIP (₹)</label>
+                        <input type="number" id="mfSIPMonthly" placeholder="5000">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Invested (₹)</label>
+                        <input type="number" id="mfSIPInvested" placeholder="60000">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="mfSIPCurrent" placeholder="65000">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="mfSIPDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addMFSIP()">Add SIP</button>
+                
+                <div class="table-container">
+                    <table id="mfSIPTable">
+                        <thead>
+                            <tr>
+                                <th>Scheme</th>
+                                <th>Monthly SIP</th>
+                                <th>Total Invested</th>
+                                <th>Current</th>
+                                <th>P&L</th>
+                                <th>P&L %</th>
+                                <th>Start Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gold Tab -->
+            <div id="gold" class="tab-content">
+                <h2>Gold</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="goldDesc" placeholder="e.g., Gold Coin, Jewelry">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (grams)</label>
+                        <input type="number" step="0.01" id="goldGrams" placeholder="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="goldInvested" placeholder="50000">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="goldCurrent" placeholder="55000">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="goldDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addGold()">Add Gold</button>
+                
+                <div class="table-container">
+                    <table id="goldTable">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Weight (g)</th>
+                                <th>Invested</th>
+                                <th>Current</th>
+                                <th>P&L</th>
+                                <th>P&L %</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Silver Tab -->
+            <div id="silver" class="tab-content">
+                <h2>Silver</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="silverDesc" placeholder="e.g., Silver Coin, Bar">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (grams)</label>
+                        <input type="number" step="0.01" id="silverGrams" placeholder="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="silverInvested" placeholder="6000">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="silverCurrent" placeholder="6500">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="silverDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addSilver()">Add Silver</button>
+                
+                <div class="table-container">
+                    <table id="silverTable">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Weight (g)</th>
+                                <th>Invested</th>
+                                <th>Current</th>
+                                <th>P&L</th>
+                                <th>P&L %</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cryptocurrency Tab -->
+            <div id="crypto" class="tab-content">
+                <h2>Cryptocurrency</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Crypto Name</label>
+                        <input type="text" id="cryptoName" placeholder="e.g., Bitcoin">
+                    </div>
+                    <div class="form-group">
+                        <label>Symbol</label>
+                        <input type="text" id="cryptoSymbol" placeholder="e.g., BTC">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" step="0.00000001" id="cryptoQty" placeholder="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="cryptoInvested" placeholder="100000">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="cryptoCurrent" placeholder="120000">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="cryptoDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addCrypto()">Add Crypto</button>
+                
+                <div class="table-container">
+                    <table id="cryptoTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Symbol</th>
+                                <th>Quantity</th>
+                                <th>Invested</th>
+                                <th>Current</th>
+                                <th>P&L</th>
+                                <th>P&L %</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Insurance Tab -->
+            <div id="insurance" class="tab-content">
+                <h2>Insurance</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Insurance Type</label>
+                        <select id="insuranceType">
+                            <option value="">Select Type</option>
+                            <option value="ULIP">ULIP</option>
+                            <option value="Endowment Plan">Endowment Plan</option>
+                            <option value="Term Insurance">Term Insurance</option>
+                            <option value="Whole Life">Whole Life</option>
+                            <option value="Money Back">Money Back</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Policy Name/Number</label>
+                        <input type="text" id="insuranceName" placeholder="Enter policy name/number">
+                    </div>
+                    <div class="form-group">
+                        <label>Insurance Company</label>
+                        <input type="text" id="insuranceCompany" placeholder="Enter company name">
+                    </div>
+                    <div class="form-group">
+                        <label>Premium Amount (₹)</label>
+                        <input type="number" id="insurancePremium" placeholder="20000">
+                    </div>
+                    <div class="form-group">
+                        <label>Premium Frequency</label>
+                        <select id="insuranceFrequency">
+                            <option value="Monthly">Monthly</option>
+                            <option value="Quarterly">Quarterly</option>
+                            <option value="Half-Yearly">Half-Yearly</option>
+                            <option value="Yearly">Yearly</option>
+                            <option value="Single">Single Premium</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Sum Assured (₹)</label>
+                        <input type="number" id="insuranceSumAssured" placeholder="1000000">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Invested (₹)</label>
+                        <input type="number" id="insuranceInvested" placeholder="100000">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="insuranceCurrent" placeholder="110000">
+                        <small style="color: #6c757d; font-size: 12px; margin-top: 4px;">For investment-linked policies</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Policy Term (Years)</label>
+                        <input type="number" id="insuranceTerm" placeholder="20">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="insuranceStartDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addInsurance()">Add Insurance</button>
+                
+                <div class="table-container">
+                    <table id="insuranceTable">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Policy Name</th>
+                                <th>Company</th>
+                                <th>Premium</th>
+                                <th>Frequency</th>
+                                <th>Sum Assured</th>
+                                <th>Invested</th>
+                                <th>Current Value</th>
+                                <th>P&L</th>
+                                <th>Term</th>
+                                <th>Start Date</th>
+                                <th>Maturity Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Income Tab -->
+            <div id="income" class="tab-content">
+                <h2>Income Sources</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Income Type</label>
+                        <select id="incomeType">
+                            <option value="Salary">Salary</option>
+                            <option value="Business">Business</option>
+                            <option value="Freelance">Freelance</option>
+                            <option value="Rental">Rental</option>
+                            <option value="Dividend">Dividend</option>
+                            <option value="Interest">Interest</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="incomeDesc" placeholder="Enter description">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Amount (₹)</label>
+                        <input type="number" id="incomeMonthly" placeholder="50000">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="incomeDate">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addIncome()">Add Income</button>
+                
+                <div class="table-container">
+                    <table id="incomeTable">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Monthly Amount</th>
+                                <th>Start Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Import/Export Tab -->
+            <div id="import-export" class="tab-content">
+                <h2>Import/Export Data</h2>
+                
+                <div style="margin-bottom: 30px;">
+                    <h3>Export Portfolio</h3>
+                    <p style="color: #6c757d; margin: 10px 0;">Download your portfolio data</p>
+                    <button class="btn btn-success" onclick="exportToExcel()">📥 Export to Excel</button>
+                    <button class="btn btn-secondary" onclick="exportToPDF()">📄 Export to PDF</button>
+                </div>
+
+                <div>
+                    <h3>Import Portfolio</h3>
+                    <p style="color: #6c757d; margin: 10px 0;">Import data from Excel file</p>
+                    <input type="file" id="importFile" accept=".xlsx,.xls" onchange="importFromExcel(event)" style="margin: 10px 0;">
+                    <div id="importStatus"></div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <h3>Clear All Data</h3>
+                    <p style="color: #dc3545; margin: 10px 0;">⚠️ This will permanently delete all your portfolio data</p>
+                    <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; flex-wrap: wrap; gap: 15px;">
+                <div style="flex: 1; min-width: 200px;">
+                    <p style="margin: 0; font-size: 14px; opacity: 0.9;">
+                        💾 <strong>Auto-Save Enabled</strong> - Your data is automatically saved in browser
+                    </p>
+                </div>
+                <div style="flex: 1; min-width: 200px; text-align: right;">
+                    <p style="margin: 0; font-size: 14px;">
+                        Developed and Designed by <strong style="font-size: 16px;">Shamsudeen EP</strong>
+                    </p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.8;">
+                        © 2024 Portfolio Manager
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-save notification -->
+    <div id="autoSaveIndicator" class="auto-save-indicator">
+        <span class="save-icon">💾</span>
+        <span>Auto-saved!</span>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Edit Item</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        // Data structure
+        let portfolioData = {
+            fd: [],
+            rd: [],
+            stock: [],
+            mfLumpsum: [],
+            mfSIP: [],
+            gold: [],
+            silver: [],
+            crypto: [],
+            insurance: [],
+            income: []
+        };
+
+        // Tab switching
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Format currency
+        function formatCurrency(amount) {
+            return '₹' + amount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+        }
+
+        // Calculate maturity date
+        function calculateMaturityDate(startDate, months) {
+            const date = new Date(startDate);
+            date.setMonth(date.getMonth() + months);
+            return date.toISOString().split('T')[0];
+        }
+
+        // Fixed Deposit Functions
+        function addFD() {
+            const bank = document.getElementById('fdBank').value;
+            const principal = parseFloat(document.getElementById('fdPrincipal').value);
+            const rate = parseFloat(document.getElementById('fdRate').value);
+            const tenure = parseInt(document.getElementById('fdTenure').value);
+            const startDate = document.getElementById('fdStartDate').value;
+
+            if (!bank || !principal || !rate || !tenure || !startDate) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const maturityAmount = principal * Math.pow(1 + rate / 400, tenure / 3);
+            const maturityDate = calculateMaturityDate(startDate, tenure);
+
+            portfolioData.fd.push({
+                bank, principal, rate, tenure, startDate, maturityDate, maturityAmount
+            });
+
+            saveData();
+            updateFDTable();
+            updateDashboard();
+            clearFDForm();
+        }
+
+        function clearFDForm() {
+            document.getElementById('fdBank').value = '';
+            document.getElementById('fdPrincipal').value = '';
+            document.getElementById('fdRate').value = '';
+            document.getElementById('fdTenure').value = '';
+            document.getElementById('fdStartDate').value = '';
+        }
+
+        function updateFDTable() {
+            const tbody = document.querySelector('#fdTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.fd.forEach((fd, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${fd.bank}</td>
+                    <td>${formatCurrency(fd.principal)}</td>
+                    <td>${fd.rate.toFixed(2)}%</td>
+                    <td>${fd.tenure} months</td>
+                    <td>${fd.startDate}</td>
+                    <td>${fd.maturityDate}</td>
+                    <td>${formatCurrency(fd.maturityAmount)}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editFD(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteFD(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteFD(index) {
+            if (confirm('Are you sure you want to delete this FD?')) {
+                portfolioData.fd.splice(index, 1);
+                saveData();
+                updateFDTable();
+                updateDashboard();
+            }
+        }
+
+        // Recurring Deposit Functions
+        function addRD() {
+            const bank = document.getElementById('rdBank').value;
+            const monthly = parseFloat(document.getElementById('rdMonthly').value);
+            const rate = parseFloat(document.getElementById('rdRate').value);
+            const tenure = parseInt(document.getElementById('rdTenure').value);
+            const startDate = document.getElementById('rdStartDate').value;
+
+            if (!bank || !monthly || !rate || !tenure || !startDate) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const r = rate / 400;
+            const n = tenure;
+            const maturityAmount = monthly * (((Math.pow(1 + r, n) - 1) / r) * (1 + r));
+            const maturityDate = calculateMaturityDate(startDate, tenure);
+
+            portfolioData.rd.push({
+                bank, monthly, rate, tenure, startDate, maturityDate, maturityAmount
+            });
+
+            saveData();
+            updateRDTable();
+            updateDashboard();
+            clearRDForm();
+        }
+
+        function clearRDForm() {
+            document.getElementById('rdBank').value = '';
+            document.getElementById('rdMonthly').value = '';
+            document.getElementById('rdRate').value = '';
+            document.getElementById('rdTenure').value = '';
+            document.getElementById('rdStartDate').value = '';
+        }
+
+        function updateRDTable() {
+            const tbody = document.querySelector('#rdTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.rd.forEach((rd, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${rd.bank}</td>
+                    <td>${formatCurrency(rd.monthly)}</td>
+                    <td>${rd.rate.toFixed(2)}%</td>
+                    <td>${rd.tenure} months</td>
+                    <td>${rd.startDate}</td>
+                    <td>${rd.maturityDate}</td>
+                    <td>${formatCurrency(rd.maturityAmount)}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editRD(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteRD(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteRD(index) {
+            if (confirm('Are you sure you want to delete this RD?')) {
+                portfolioData.rd.splice(index, 1);
+                saveData();
+                updateRDTable();
+                updateDashboard();
+            }
+        }
+
+        // Stock Functions
+        function addStock() {
+            const name = document.getElementById('stockName').value;
+            const quantity = parseFloat(document.getElementById('stockQty').value);
+            const invested = parseFloat(document.getElementById('stockInvested').value);
+            const current = parseFloat(document.getElementById('stockCurrent').value);
+            const date = document.getElementById('stockDate').value;
+
+            if (!name || !quantity || !invested || !current || !date) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            portfolioData.stock.push({ name, quantity, invested, current, date });
+            saveData();
+            updateStockTable();
+            updateDashboard();
+            clearStockForm();
+        }
+
+        function clearStockForm() {
+            document.getElementById('stockName').value = '';
+            document.getElementById('stockQty').value = '';
+            document.getElementById('stockInvested').value = '';
+            document.getElementById('stockCurrent').value = '';
+            document.getElementById('stockDate').value = '';
+        }
+
+        function updateStockTable() {
+            const tbody = document.querySelector('#stockTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.stock.forEach((stock, index) => {
+                const pl = stock.current - stock.invested;
+                const plPercent = (pl / stock.invested) * 100;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${stock.name}</td>
+                    <td>${stock.quantity}</td>
+                    <td>${formatCurrency(stock.invested)}</td>
+                    <td>${formatCurrency(stock.current)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${formatCurrency(pl)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${plPercent.toFixed(2)}%</td>
+                    <td>${stock.date}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editStock(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteStock(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteStock(index) {
+            if (confirm('Are you sure you want to delete this stock?')) {
+                portfolioData.stock.splice(index, 1);
+                saveData();
+                updateStockTable();
+                updateDashboard();
+            }
+        }
+
+        // Mutual Fund Lumpsum Functions
+        function addMFLumpsum() {
+            const name = document.getElementById('mfLumpsumName').value;
+            const invested = parseFloat(document.getElementById('mfLumpsumInvested').value);
+            const current = parseFloat(document.getElementById('mfLumpsumCurrent').value);
+            const date = document.getElementById('mfLumpsumDate').value;
+
+            if (!name || !invested || !current || !date) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            portfolioData.mfLumpsum.push({ name, invested, current, date });
+            saveData();
+            updateMFLumpsumTable();
+            updateDashboard();
+            clearMFLumpsumForm();
+        }
+
+        function clearMFLumpsumForm() {
+            document.getElementById('mfLumpsumName').value = '';
+            document.getElementById('mfLumpsumInvested').value = '';
+            document.getElementById('mfLumpsumCurrent').value = '';
+            document.getElementById('mfLumpsumDate').value = '';
+        }
+
+        function updateMFLumpsumTable() {
+            const tbody = document.querySelector('#mfLumpsumTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.mfLumpsum.forEach((mf, index) => {
+                const pl = mf.current - mf.invested;
+                const plPercent = (pl / mf.invested) * 100;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${mf.name}</td>
+                    <td>${formatCurrency(mf.invested)}</td>
+                    <td>${formatCurrency(mf.current)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${formatCurrency(pl)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${plPercent.toFixed(2)}%</td>
+                    <td>${mf.date}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editMFLumpsum(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMFLumpsum(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteMFLumpsum(index) {
+            if (confirm('Are you sure you want to delete this mutual fund?')) {
+                portfolioData.mfLumpsum.splice(index, 1);
+                saveData();
+                updateMFLumpsumTable();
+                updateDashboard();
+            }
+        }
+
+        // Mutual Fund SIP Functions
+        function addMFSIP() {
+            const name = document.getElementById('mfSIPName').value;
+            const monthly = parseFloat(document.getElementById('mfSIPMonthly').value);
+            const totalInvested = parseFloat(document.getElementById('mfSIPInvested').value);
+            const current = parseFloat(document.getElementById('mfSIPCurrent').value);
+            const date = document.getElementById('mfSIPDate').value;
+
+            if (!name || !monthly || !totalInvested || !current || !date) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            portfolioData.mfSIP.push({ name, monthly, totalInvested, current, date });
+            saveData();
+            updateMFSIPTable();
+            updateDashboard();
+            clearMFSIPForm();
+        }
+
+        function clearMFSIPForm() {
+            document.getElementById('mfSIPName').value = '';
+            document.getElementById('mfSIPMonthly').value = '';
+            document.getElementById('mfSIPInvested').value = '';
+            document.getElementById('mfSIPCurrent').value = '';
+            document.getElementById('mfSIPDate').value = '';
+        }
+
+        function updateMFSIPTable() {
+            const tbody = document.querySelector('#mfSIPTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.mfSIP.forEach((sip, index) => {
+                const pl = sip.current - sip.totalInvested;
+                const plPercent = (pl / sip.totalInvested) * 100;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${sip.name}</td>
+                    <td>${formatCurrency(sip.monthly)}</td>
+                    <td>${formatCurrency(sip.totalInvested)}</td>
+                    <td>${formatCurrency(sip.current)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${formatCurrency(pl)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${plPercent.toFixed(2)}%</td>
+                    <td>${sip.date}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editMFSIP(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteMFSIP(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteMFSIP(index) {
+            if (confirm('Are you sure you want to delete this SIP?')) {
+                portfolioData.mfSIP.splice(index, 1);
+                saveData();
+                updateMFSIPTable();
+                updateDashboard();
+            }
+        }
+
+        // Gold Functions
+        function addGold() {
+            const description = document.getElementById('goldDesc').value;
+            const grams = parseFloat(document.getElementById('goldGrams').value);
+            const invested = parseFloat(document.getElementById('goldInvested').value);
+            const current = parseFloat(document.getElementById('goldCurrent').value);
+            const date = document.getElementById('goldDate').value;
+
+            if (!description || !grams || !invested || !current || !date) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            portfolioData.gold.push({ description, grams, invested, current, date });
+            saveData();
+            updateGoldTable();
+            updateDashboard();
+            clearGoldForm();
+        }
+
+        function clearGoldForm() {
+            document.getElementById('goldDesc').value = '';
+            document.getElementById('goldGrams').value = '';
+            document.getElementById('goldInvested').value = '';
+            document.getElementById('goldCurrent').value = '';
+            document.getElementById('goldDate').value = '';
+        }
+
+        function updateGoldTable() {
+            const tbody = document.querySelector('#goldTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.gold.forEach((gold, index) => {
+                const pl = gold.current - gold.invested;
+                const plPercent = (pl / gold.invested) * 100;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${gold.description}</td>
+                    <td>${gold.grams.toFixed(2)}</td>
+                    <td>${formatCurrency(gold.invested)}</td>
+                    <td>${formatCurrency(gold.current)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${formatCurrency(pl)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${plPercent.toFixed(2)}%</td>
+                    <td>${gold.date}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editGold(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteGold(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteGold(index) {
+            if (confirm('Are you sure you want to delete this gold entry?')) {
+                portfolioData.gold.splice(index, 1);
+                saveData();
+                updateGoldTable();
+                updateDashboard();
+            }
+        }
+
+        // Silver Functions
+        function addSilver() {
+            const description = document.getElementById('silverDesc').value;
+            const grams = parseFloat(document.getElementById('silverGrams').value);
+            const invested = parseFloat(document.getElementById('silverInvested').value);
+            const current = parseFloat(document.getElementById('silverCurrent').value);
+            const date = document.getElementById('silverDate').value;
+
+            if (!description || !grams || !invested || !current || !date) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            portfolioData.silver.push({ description, grams, invested, current, date });
+            saveData();
+            updateSilverTable();
+            updateDashboard();
+            clearSilverForm();
+        }
+
+        function clearSilverForm() {
+            document.getElementById('silverDesc').value = '';
+            document.getElementById('silverGrams').value = '';
+            document.getElementById('silverInvested').value = '';
+            document.getElementById('silverCurrent').value = '';
+            document.getElementById('silverDate').value = '';
+        }
+
+        function updateSilverTable() {
+            const tbody = document.querySelector('#silverTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.silver.forEach((silver, index) => {
+                const pl = silver.current - silver.invested;
+                const plPercent = (pl / silver.invested) * 100;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${silver.description}</td>
+                    <td>${silver.grams.toFixed(2)}</td>
+                    <td>${formatCurrency(silver.invested)}</td>
+                    <td>${formatCurrency(silver.current)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${formatCurrency(pl)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${plPercent.toFixed(2)}%</td>
+                    <td>${silver.date}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editSilver(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSilver(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteSilver(index) {
+            if (confirm('Are you sure you want to delete this silver entry?')) {
+                portfolioData.silver.splice(index, 1);
+                saveData();
+                updateSilverTable();
+                updateDashboard();
+            }
+        }
+
+        // Cryptocurrency Functions
+        function addCrypto() {
+            const name = document.getElementById('cryptoName').value;
+            const symbol = document.getElementById('cryptoSymbol').value;
+            const quantity = parseFloat(document.getElementById('cryptoQty').value);
+            const invested = parseFloat(document.getElementById('cryptoInvested').value);
+            const current = parseFloat(document.getElementById('cryptoCurrent').value);
+            const date = document.getElementById('cryptoDate').value;
+
+            if (!name || !symbol || !quantity || !invested || !current || !date) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            portfolioData.crypto.push({ name, symbol, quantity, invested, current, date });
+            saveData();
+            updateCryptoTable();
+            updateDashboard();
+            clearCryptoForm();
+        }
+
+        function clearCryptoForm() {
+            document.getElementById('cryptoName').value = '';
+            document.getElementById('cryptoSymbol').value = '';
+            document.getElementById('cryptoQty').value = '';
+            document.getElementById('cryptoInvested').value = '';
+            document.getElementById('cryptoCurrent').value = '';
+            document.getElementById('cryptoDate').value = '';
+        }
+
+        function updateCryptoTable() {
+            const tbody = document.querySelector('#cryptoTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.crypto.forEach((crypto, index) => {
+                const pl = crypto.current - crypto.invested;
+                const plPercent = (pl / crypto.invested) * 100;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${crypto.name}</td>
+                    <td>${crypto.symbol}</td>
+                    <td>${crypto.quantity}</td>
+                    <td>${formatCurrency(crypto.invested)}</td>
+                    <td>${formatCurrency(crypto.current)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${formatCurrency(pl)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${plPercent.toFixed(2)}%</td>
+                    <td>${crypto.date}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editCrypto(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCrypto(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteCrypto(index) {
+            if (confirm('Are you sure you want to delete this crypto entry?')) {
+                portfolioData.crypto.splice(index, 1);
+                saveData();
+                updateCryptoTable();
+                updateDashboard();
+            }
+        }
+
+        // Insurance Functions
+        function addInsurance() {
+            const type = document.getElementById('insuranceType').value;
+            const name = document.getElementById('insuranceName').value;
+            const company = document.getElementById('insuranceCompany').value;
+            const premium = parseFloat(document.getElementById('insurancePremium').value);
+            const frequency = document.getElementById('insuranceFrequency').value;
+            const sumAssured = parseFloat(document.getElementById('insuranceSumAssured').value);
+            const invested = parseFloat(document.getElementById('insuranceInvested').value);
+            const current = parseFloat(document.getElementById('insuranceCurrent').value);
+            const term = parseInt(document.getElementById('insuranceTerm').value);
+            const startDate = document.getElementById('insuranceStartDate').value;
+
+            if (!type || !name || !company || !premium || !frequency || !sumAssured || !invested || !current || !term || !startDate) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const maturityDate = calculateMaturityDate(startDate, term * 12);
+
+            portfolioData.insurance.push({
+                type, name, company, premium, frequency, sumAssured, 
+                invested, current, term, startDate, maturityDate
+            });
+
+            saveData();
+            updateInsuranceTable();
+            updateDashboard();
+            clearInsuranceForm();
+        }
+
+        function clearInsuranceForm() {
+            document.getElementById('insuranceType').value = '';
+            document.getElementById('insuranceName').value = '';
+            document.getElementById('insuranceCompany').value = '';
+            document.getElementById('insurancePremium').value = '';
+            document.getElementById('insuranceFrequency').value = 'Yearly';
+            document.getElementById('insuranceSumAssured').value = '';
+            document.getElementById('insuranceInvested').value = '';
+            document.getElementById('insuranceCurrent').value = '';
+            document.getElementById('insuranceTerm').value = '';
+            document.getElementById('insuranceStartDate').value = '';
+        }
+
+        function updateInsuranceTable() {
+            const tbody = document.querySelector('#insuranceTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.insurance.forEach((ins, index) => {
+                const pl = ins.current - ins.invested;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${ins.type}</td>
+                    <td>${ins.name}</td>
+                    <td>${ins.company}</td>
+                    <td>${formatCurrency(ins.premium)}</td>
+                    <td>${ins.frequency}</td>
+                    <td>${formatCurrency(ins.sumAssured)}</td>
+                    <td>${formatCurrency(ins.invested)}</td>
+                    <td>${formatCurrency(ins.current)}</td>
+                    <td class="${pl >= 0 ? 'positive' : 'negative'}">${formatCurrency(pl)}</td>
+                    <td>${ins.term} years</td>
+                    <td>${ins.startDate}</td>
+                    <td>${ins.maturityDate}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editInsurance(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteInsurance(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteInsurance(index) {
+            if (confirm('Are you sure you want to delete this insurance policy?')) {
+                portfolioData.insurance.splice(index, 1);
+                saveData();
+                updateInsuranceTable();
+                updateDashboard();
+            }
+        }
+
+        // Income Functions
+        function addIncome() {
+            const type = document.getElementById('incomeType').value;
+            const description = document.getElementById('incomeDesc').value;
+            const monthly = parseFloat(document.getElementById('incomeMonthly').value);
+            const date = document.getElementById('incomeDate').value;
+
+            if (!type || !description || !monthly || !date) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            portfolioData.income.push({ type, description, monthly, date });
+            saveData();
+            updateIncomeTable();
+            updateDashboard();
+            clearIncomeForm();
+        }
+
+        function clearIncomeForm() {
+            document.getElementById('incomeType').value = 'Salary';
+            document.getElementById('incomeDesc').value = '';
+            document.getElementById('incomeMonthly').value = '';
+            document.getElementById('incomeDate').value = '';
+        }
+
+        function updateIncomeTable() {
+            const tbody = document.querySelector('#incomeTable tbody');
+            tbody.innerHTML = '';
+
+            portfolioData.income.forEach((income, index) => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${income.type}</td>
+                    <td>${income.description}</td>
+                    <td>${formatCurrency(income.monthly)}</td>
+                    <td>${income.date}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editIncome(${index})">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteIncome(${index})">🗑️ Delete</button>
+                    </td>
+                `;
+            });
+        }
+
+        function deleteIncome(index) {
+            if (confirm('Are you sure you want to delete this income source?')) {
+                portfolioData.income.splice(index, 1);
+                saveData();
+                updateIncomeTable();
+                updateDashboard();
+            }
+        }
+
+        // Dashboard Functions
+        function updateDashboard() {
+            const totalInvested = portfolioData.stock.reduce((sum, s) => sum + s.invested, 0) +
+                                 portfolioData.mfLumpsum.reduce((sum, m) => sum + m.invested, 0) +
+                                 portfolioData.mfSIP.reduce((sum, s) => sum + s.totalInvested, 0) +
+                                 portfolioData.gold.reduce((sum, g) => sum + g.invested, 0) +
+                                 portfolioData.silver.reduce((sum, s) => sum + s.invested, 0) +
+                                 portfolioData.crypto.reduce((sum, c) => sum + c.invested, 0) +
+                                 portfolioData.insurance.reduce((sum, i) => sum + i.invested, 0) +
+                                 portfolioData.fd.reduce((sum, fd) => sum + fd.principal, 0) +
+                                 portfolioData.rd.reduce((sum, rd) => sum + (rd.monthly * rd.tenure), 0);
+
+            const totalCurrent = portfolioData.stock.reduce((sum, s) => sum + s.current, 0) +
+                                portfolioData.mfLumpsum.reduce((sum, m) => sum + m.current, 0) +
+                                portfolioData.mfSIP.reduce((sum, s) => sum + s.current, 0) +
+                                portfolioData.gold.reduce((sum, g) => sum + g.current, 0) +
+                                portfolioData.silver.reduce((sum, s) => sum + s.current, 0) +
+                                portfolioData.crypto.reduce((sum, c) => sum + c.current, 0) +
+                                portfolioData.insurance.reduce((sum, i) => sum + i.current, 0) +
+                                portfolioData.fd.reduce((sum, fd) => sum + fd.maturityAmount, 0) +
+                                portfolioData.rd.reduce((sum, rd) => sum + rd.maturityAmount, 0);
+
+            const totalPL = totalCurrent - totalInvested;
+            const monthlyIncome = portfolioData.income.reduce((sum, i) => sum + i.monthly, 0);
+
+            document.getElementById('totalInvested').textContent = formatCurrency(totalInvested);
+            document.getElementById('currentValue').textContent = formatCurrency(totalCurrent);
+            document.getElementById('totalPL').textContent = formatCurrency(totalPL);
+            document.getElementById('totalPL').className = 'value ' + (totalPL >= 0 ? 'positive' : 'negative');
+            document.getElementById('monthlyIncome').textContent = formatCurrency(monthlyIncome);
+
+            // Calculate statistics
+            updateStatistics();
+            
+            // Update asset breakdown
+            updateAssetBreakdown(totalCurrent);
+        }
+
+        function updateStatistics() {
+            // Calculate total number of assets
+            const totalAssets = portfolioData.stock.length + 
+                               portfolioData.mfLumpsum.length + 
+                               portfolioData.mfSIP.length + 
+                               portfolioData.gold.length + 
+                               portfolioData.silver.length + 
+                               portfolioData.crypto.length + 
+                               portfolioData.insurance.length +
+                               portfolioData.fd.length + 
+                               portfolioData.rd.length;
+            
+            document.getElementById('totalAssets').textContent = totalAssets;
+
+            // Calculate returns for each asset category
+            const assetReturns = [];
+
+            // Stocks
+            portfolioData.stock.forEach(s => {
+                if (s.invested > 0) {
+                    assetReturns.push({
+                        name: s.name,
+                        category: 'Stock',
+                        return: ((s.current - s.invested) / s.invested) * 100
+                    });
+                }
+            });
+
+            // MF Lumpsum
+            portfolioData.mfLumpsum.forEach(m => {
+                if (m.invested > 0) {
+                    assetReturns.push({
+                        name: m.name,
+                        category: 'MF',
+                        return: ((m.current - m.invested) / m.invested) * 100
+                    });
+                }
+            });
+
+            // MF SIP
+            portfolioData.mfSIP.forEach(s => {
+                if (s.totalInvested > 0) {
+                    assetReturns.push({
+                        name: s.name,
+                        category: 'SIP',
+                        return: ((s.current - s.totalInvested) / s.totalInvested) * 100
+                    });
+                }
+            });
+
+            // Gold
+            portfolioData.gold.forEach(g => {
+                if (g.invested > 0) {
+                    assetReturns.push({
+                        name: g.description,
+                        category: 'Gold',
+                        return: ((g.current - g.invested) / g.invested) * 100
+                    });
+                }
+            });
+
+            // Silver
+            portfolioData.silver.forEach(s => {
+                if (s.invested > 0) {
+                    assetReturns.push({
+                        name: s.description,
+                        category: 'Silver',
+                        return: ((s.current - s.invested) / s.invested) * 100
+                    });
+                }
+            });
+
+            // Crypto
+            portfolioData.crypto.forEach(c => {
+                if (c.invested > 0) {
+                    assetReturns.push({
+                        name: c.name,
+                        category: 'Crypto',
+                        return: ((c.current - c.invested) / c.invested) * 100
+                    });
+                }
+            });
+
+            // Insurance
+            portfolioData.insurance.forEach(i => {
+                if (i.invested > 0) {
+                    assetReturns.push({
+                        name: i.name,
+                        category: 'Insurance',
+                        return: ((i.current - i.invested) / i.invested) * 100
+                    });
+                }
+            });
+
+            // Find best and worst performers
+            if (assetReturns.length > 0) {
+                assetReturns.sort((a, b) => b.return - a.return);
+                
+                const best = assetReturns[0];
+                const worst = assetReturns[assetReturns.length - 1];
+                
+                document.getElementById('bestPerformer').textContent = best.name.substring(0, 20) + (best.name.length > 20 ? '...' : '');
+                document.getElementById('bestPerformerReturn').textContent = `+${best.return.toFixed(2)}%`;
+                
+                document.getElementById('worstPerformer').textContent = worst.name.substring(0, 20) + (worst.name.length > 20 ? '...' : '');
+                document.getElementById('worstPerformerReturn').textContent = `${worst.return.toFixed(2)}%`;
+                
+                // Calculate average return
+                const avgReturn = assetReturns.reduce((sum, a) => sum + a.return, 0) / assetReturns.length;
+                document.getElementById('avgReturn').textContent = avgReturn.toFixed(2) + '%';
+            } else {
+                document.getElementById('bestPerformer').textContent = 'No data';
+                document.getElementById('bestPerformerReturn').textContent = '';
+                document.getElementById('worstPerformer').textContent = 'No data';
+                document.getElementById('worstPerformerReturn').textContent = '';
+                document.getElementById('avgReturn').textContent = '0%';
+            }
+        }
+
+        function updateAssetBreakdown(totalCurrent) {
+            const assetBreakdown = document.getElementById('assetBreakdown');
+            assetBreakdown.innerHTML = '';
+
+            const assetColors = {
+                'Stocks': '#667eea',
+                'Mutual Funds': '#f093fb',
+                'Fixed Deposits': '#4facfe',
+                'Recurring Deposits': '#43e97b',
+                'Gold': '#feca57',
+                'Silver': '#a29bfe',
+                'Cryptocurrency': '#fd79a8',
+                'Insurance': '#00b894'
+            };
+
+            const assetIcons = {
+                'Stocks': '📈',
+                'Mutual Funds': '📊',
+                'Fixed Deposits': '🏦',
+                'Recurring Deposits': '💰',
+                'Gold': '🥇',
+                'Silver': '🥈',
+                'Cryptocurrency': '₿',
+                'Insurance': '🛡️'
+            };
+
+            const assets = [
+                { name: 'Stocks', value: portfolioData.stock.reduce((sum, s) => sum + s.current, 0) },
+                { name: 'Mutual Funds', value: portfolioData.mfLumpsum.reduce((sum, m) => sum + m.current, 0) + portfolioData.mfSIP.reduce((sum, s) => sum + s.current, 0) },
+                { name: 'Fixed Deposits', value: portfolioData.fd.reduce((sum, fd) => sum + fd.maturityAmount, 0) },
+                { name: 'Recurring Deposits', value: portfolioData.rd.reduce((sum, rd) => sum + rd.maturityAmount, 0) },
+                { name: 'Gold', value: portfolioData.gold.reduce((sum, g) => sum + g.current, 0) },
+                { name: 'Silver', value: portfolioData.silver.reduce((sum, s) => sum + s.current, 0) },
+                { name: 'Cryptocurrency', value: portfolioData.crypto.reduce((sum, c) => sum + c.current, 0) },
+                { name: 'Insurance', value: portfolioData.insurance.reduce((sum, i) => sum + i.current, 0) }
+            ];
+
+            assets.forEach(asset => {
+                if (asset.value > 0) {
+                    const percentage = totalCurrent > 0 ? (asset.value / totalCurrent * 100).toFixed(2) : 0;
+                    const card = document.createElement('div');
+                    card.className = 'asset-card';
+                    card.style.borderLeftWidth = '6px';
+                    card.style.borderLeftColor = assetColors[asset.name];
+                    card.innerHTML = `
+                        <h4>${assetIcons[asset.name]} ${asset.name}</h4>
+                        <div class="amount" style="color: ${assetColors[asset.name]}">${formatCurrency(asset.value)}</div>
+                        <div class="percentage">${percentage}% of portfolio</div>
+                    `;
+                    assetBreakdown.appendChild(card);
+                }
+            });
+
+            // If no assets, show a message
+            if (assets.every(a => a.value === 0)) {
+                assetBreakdown.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 40px; grid-column: 1/-1;">No investments added yet. Start by adding your first investment!</p>';
+            }
+        }
+
+        // Update all tables
+        function updateAllTables() {
+            updateFDTable();
+            updateRDTable();
+            updateStockTable();
+            updateMFLumpsumTable();
+            updateMFSIPTable();
+            updateGoldTable();
+            updateSilverTable();
+            updateCryptoTable();
+            updateInsuranceTable();
+            updateIncomeTable();
+        }
+
+        // Local Storage Functions
+        function saveData() {
+            localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
+            showAutoSaveNotification();
+        }
+
+        function showAutoSaveNotification() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.style.display = 'flex';
+            
+            setTimeout(() => {
+                indicator.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    indicator.style.display = 'none';
+                    indicator.style.animation = 'slideIn 0.3s ease';
+                }, 300);
+            }, 2000);
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('portfolioData');
+            if (saved) {
+                portfolioData = JSON.parse(saved);
+                // Ensure insurance array exists in older data
+                if (!portfolioData.insurance) {
+                    portfolioData.insurance = [];
+                }
+                updateAllTables();
+                updateDashboard();
+            }
+        }
+
+        // Export to Excel
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            // FD Sheet
+            if (portfolioData.fd.length > 0) {
+                const fdData = portfolioData.fd.map(fd => ({
+                    'Bank': fd.bank,
+                    'Principal': fd.principal,
+                    'Rate %': fd.rate,
+                    'Tenure (Months)': fd.tenure,
+                    'Start Date': fd.startDate,
+                    'Maturity Date': fd.maturityDate,
+                    'Maturity Amount': fd.maturityAmount
+                }));
+                const ws = XLSX.utils.json_to_sheet(fdData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Fixed Deposits');
+            }
+            
+            // RD Sheet
+            if (portfolioData.rd.length > 0) {
+                const rdData = portfolioData.rd.map(rd => ({
+                    'Bank': rd.bank,
+                    'Monthly': rd.monthly,
+                    'Rate %': rd.rate,
+                    'Tenure (Months)': rd.tenure,
+                    'Start Date': rd.startDate,
+                    'Maturity Date': rd.maturityDate,
+                    'Maturity Amount': rd.maturityAmount
+                }));
+                const ws = XLSX.utils.json_to_sheet(rdData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Recurring Deposits');
+            }
+            
+            // Stocks Sheet
+            if (portfolioData.stock.length > 0) {
+                const stockData = portfolioData.stock.map(s => ({
+                    'Name': s.name,
+                    'Quantity': s.quantity,
+                    'Invested': s.invested,
+                    'Current': s.current,
+                    'P&L': s.current - s.invested,
+                    'Date': s.date
+                }));
+                const ws = XLSX.utils.json_to_sheet(stockData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Stocks');
+            }
+            
+            // MF Lumpsum Sheet
+            if (portfolioData.mfLumpsum.length > 0) {
+                const mfLumpsumData = portfolioData.mfLumpsum.map(m => ({
+                    'Scheme': m.name,
+                    'Invested': m.invested,
+                    'Current': m.current,
+                    'P&L': m.current - m.invested,
+                    'Date': m.date
+                }));
+                const ws = XLSX.utils.json_to_sheet(mfLumpsumData);
+                XLSX.utils.book_append_sheet(wb, ws, 'MF Lumpsum');
+            }
+            
+            // MF SIP Sheet
+            if (portfolioData.mfSIP.length > 0) {
+                const mfSIPData = portfolioData.mfSIP.map(s => ({
+                    'Scheme': s.name,
+                    'Monthly SIP': s.monthly,
+                    'Total Invested': s.totalInvested,
+                    'Current': s.current,
+                    'P&L': s.current - s.totalInvested,
+                    'Start Date': s.date
+                }));
+                const ws = XLSX.utils.json_to_sheet(mfSIPData);
+                XLSX.utils.book_append_sheet(wb, ws, 'MF SIP');
+            }
+            
+            // Gold Sheet
+            if (portfolioData.gold.length > 0) {
+                const goldData = portfolioData.gold.map(g => ({
+                    'Description': g.description,
+                    'Weight (g)': g.grams,
+                    'Invested': g.invested,
+                    'Current': g.current,
+                    'P&L': g.current - g.invested,
+                    'Date': g.date
+                }));
+                const ws = XLSX.utils.json_to_sheet(goldData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Gold');
+            }
+            
+            // Silver Sheet
+            if (portfolioData.silver.length > 0) {
+                const silverData = portfolioData.silver.map(s => ({
+                    'Description': s.description,
+                    'Weight (g)': s.grams,
+                    'Invested': s.invested,
+                    'Current': s.current,
+                    'P&L': s.current - s.invested,
+                    'Date': s.date
+                }));
+                const ws = XLSX.utils.json_to_sheet(silverData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Silver');
+            }
+            
+            // Crypto Sheet
+            if (portfolioData.crypto.length > 0) {
+                const cryptoData = portfolioData.crypto.map(c => ({
+                    'Name': c.name,
+                    'Symbol': c.symbol,
+                    'Quantity': c.quantity,
+                    'Invested': c.invested,
+                    'Current': c.current,
+                    'P&L': c.current - c.invested,
+                    'Date': c.date
+                }));
+                const ws = XLSX.utils.json_to_sheet(cryptoData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Cryptocurrency');
+            }
+
+            // Insurance Sheet
+            if (portfolioData.insurance.length > 0) {
+                const insuranceData = portfolioData.insurance.map(i => ({
+                    'Type': i.type,
+                    'Policy Name': i.name,
+                    'Company': i.company,
+                    'Premium': i.premium,
+                    'Frequency': i.frequency,
+                    'Sum Assured': i.sumAssured,
+                    'Total Invested': i.invested,
+                    'Current Value': i.current,
+                    'P&L': i.current - i.invested,
+                    'Term (Years)': i.term,
+                    'Start Date': i.startDate,
+                    'Maturity Date': i.maturityDate
+                }));
+                const ws = XLSX.utils.json_to_sheet(insuranceData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Insurance');
+            }
+            
+            // Income Sheet
+            if (portfolioData.income.length > 0) {
+                const incomeData = portfolioData.income.map(i => ({
+                    'Type': i.type,
+                    'Description': i.description,
+                    'Monthly Amount': i.monthly,
+                    'Start Date': i.date
+                }));
+                const ws = XLSX.utils.json_to_sheet(incomeData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Income');
+            }
+            
+            XLSX.writeFile(wb, 'Portfolio_' + new Date().toISOString().split('T')[0] + '.xlsx');
+        }
+
+        // Import from Excel
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    let importedCount = 0;
+                    let errorCount = 0;
+                    
+                    // Import FDs
+                    if (workbook.SheetNames.includes('Fixed Deposits')) {
+                        try {
+                            const ws = workbook.Sheets['Fixed Deposits'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.fd = [];
+                            jsonData.forEach(row => {
+                                portfolioData.fd.push({
+                                    bank: row['Bank'] || row['bank'],
+                                    principal: parseFloat(row['Principal'] || row['principal']),
+                                    rate: parseFloat(row['Rate %'] || row['rate']),
+                                    tenure: parseInt(row['Tenure (Months)'] || row['tenure']),
+                                    startDate: excelDateToJSDate(row['Start Date'] || row['startDate']),
+                                    maturityDate: excelDateToJSDate(row['Maturity Date'] || row['maturityDate']),
+                                    maturityAmount: parseFloat(row['Maturity Amount'] || row['maturityAmount'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing FDs:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import RDs
+                    if (workbook.SheetNames.includes('Recurring Deposits')) {
+                        try {
+                            const ws = workbook.Sheets['Recurring Deposits'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.rd = [];
+                            jsonData.forEach(row => {
+                                portfolioData.rd.push({
+                                    bank: row['Bank'] || row['bank'],
+                                    monthly: parseFloat(row['Monthly'] || row['monthly']),
+                                    rate: parseFloat(row['Rate %'] || row['rate']),
+                                    tenure: parseInt(row['Tenure (Months)'] || row['tenure']),
+                                    startDate: excelDateToJSDate(row['Start Date'] || row['startDate']),
+                                    maturityDate: excelDateToJSDate(row['Maturity Date'] || row['maturityDate']),
+                                    maturityAmount: parseFloat(row['Maturity Amount'] || row['maturityAmount'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing RDs:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import Stocks
+                    if (workbook.SheetNames.includes('Stocks')) {
+                        try {
+                            const ws = workbook.Sheets['Stocks'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.stock = [];
+                            jsonData.forEach(row => {
+                                portfolioData.stock.push({
+                                    name: row['Name'] || row['name'],
+                                    quantity: parseFloat(row['Quantity'] || row['quantity']),
+                                    invested: parseFloat(row['Invested'] || row['invested']),
+                                    current: parseFloat(row['Current'] || row['current']),
+                                    date: excelDateToJSDate(row['Date'] || row['date'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing Stocks:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import MF Lumpsum
+                    if (workbook.SheetNames.includes('MF Lumpsum')) {
+                        try {
+                            const ws = workbook.Sheets['MF Lumpsum'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.mfLumpsum = [];
+                            jsonData.forEach(row => {
+                                portfolioData.mfLumpsum.push({
+                                    name: row['Scheme'] || row['name'],
+                                    invested: parseFloat(row['Invested'] || row['invested']),
+                                    current: parseFloat(row['Current'] || row['current']),
+                                    date: excelDateToJSDate(row['Date'] || row['date'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing MF Lumpsum:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import MF SIP
+                    if (workbook.SheetNames.includes('MF SIP')) {
+                        try {
+                            const ws = workbook.Sheets['MF SIP'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.mfSIP = [];
+                            jsonData.forEach(row => {
+                                portfolioData.mfSIP.push({
+                                    name: row['Scheme'] || row['name'],
+                                    monthly: parseFloat(row['Monthly SIP'] || row['monthly']),
+                                    totalInvested: parseFloat(row['Total Invested'] || row['totalInvested']),
+                                    current: parseFloat(row['Current'] || row['current']),
+                                    date: excelDateToJSDate(row['Start Date'] || row['date'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing MF SIP:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import Gold
+                    if (workbook.SheetNames.includes('Gold')) {
+                        try {
+                            const ws = workbook.Sheets['Gold'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.gold = [];
+                            jsonData.forEach(row => {
+                                portfolioData.gold.push({
+                                    description: row['Description'] || row['description'],
+                                    grams: parseFloat(row['Weight (g)'] || row['grams']),
+                                    invested: parseFloat(row['Invested'] || row['invested']),
+                                    current: parseFloat(row['Current'] || row['current']),
+                                    date: excelDateToJSDate(row['Date'] || row['date'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing Gold:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import Silver
+                    if (workbook.SheetNames.includes('Silver')) {
+                        try {
+                            const ws = workbook.Sheets['Silver'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.silver = [];
+                            jsonData.forEach(row => {
+                                portfolioData.silver.push({
+                                    description: row['Description'] || row['description'],
+                                    grams: parseFloat(row['Weight (g)'] || row['grams']),
+                                    invested: parseFloat(row['Invested'] || row['invested']),
+                                    current: parseFloat(row['Current'] || row['current']),
+                                    date: excelDateToJSDate(row['Date'] || row['date'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing Silver:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import Crypto
+                    if (workbook.SheetNames.includes('Crypto') || workbook.SheetNames.includes('Cryptocurrency')) {
+                        try {
+                            const sheetName = workbook.SheetNames.includes('Cryptocurrency') ? 'Cryptocurrency' : 'Crypto';
+                            const ws = workbook.Sheets[sheetName];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.crypto = [];
+                            jsonData.forEach(row => {
+                                portfolioData.crypto.push({
+                                    name: row['Name'] || row['name'],
+                                    symbol: row['Symbol'] || row['symbol'],
+                                    quantity: parseFloat(row['Quantity'] || row['quantity']),
+                                    invested: parseFloat(row['Invested'] || row['invested']),
+                                    current: parseFloat(row['Current'] || row['current']),
+                                    date: excelDateToJSDate(row['Date'] || row['date'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing Crypto:', err);
+                            errorCount++;
+                        }
+                    }
+
+                    // Import Insurance
+                    if (workbook.SheetNames.includes('Insurance')) {
+                        try {
+                            const ws = workbook.Sheets['Insurance'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.insurance = [];
+                            jsonData.forEach(row => {
+                                portfolioData.insurance.push({
+                                    type: row['Type'] || row['type'],
+                                    name: row['Policy Name'] || row['name'],
+                                    company: row['Company'] || row['company'],
+                                    premium: parseFloat(row['Premium'] || row['premium']),
+                                    frequency: row['Frequency'] || row['frequency'],
+                                    sumAssured: parseFloat(row['Sum Assured'] || row['sumAssured']),
+                                    invested: parseFloat(row['Total Invested'] || row['invested']),
+                                    current: parseFloat(row['Current Value'] || row['current']),
+                                    term: parseInt(row['Term (Years)'] || row['term']),
+                                    startDate: excelDateToJSDate(row['Start Date'] || row['startDate']),
+                                    maturityDate: excelDateToJSDate(row['Maturity Date'] || row['maturityDate'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing Insurance:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    // Import Income
+                    if (workbook.SheetNames.includes('Income')) {
+                        try {
+                            const ws = workbook.Sheets['Income'];
+                            const jsonData = XLSX.utils.sheet_to_json(ws);
+                            portfolioData.income = [];
+                            jsonData.forEach(row => {
+                                portfolioData.income.push({
+                                    type: row['Type'] || row['type'],
+                                    description: row['Description'] || row['description'],
+                                    monthly: parseFloat(row['Monthly Amount'] || row['monthly']),
+                                    date: excelDateToJSDate(row['Start Date'] || row['date'])
+                                });
+                                importedCount++;
+                            });
+                        } catch (err) {
+                            console.error('Error importing Income:', err);
+                            errorCount++;
+                        }
+                    }
+                    
+                    saveData();
+                    updateAllTables();
+                    updateDashboard();
+                    
+                    const statusDiv = document.getElementById('importStatus');
+                    statusDiv.style.display = 'block';
+                    if (errorCount === 0) {
+                        statusDiv.style.background = '#d4edda';
+                        statusDiv.style.color = '#155724';
+                        statusDiv.innerHTML = `✅ Successfully imported ${importedCount} items from Excel!`;
+                    } else {
+                        statusDiv.style.background = '#fff3cd';
+                        statusDiv.style.color = '#856404';
+                        statusDiv.innerHTML = `⚠️ Imported ${importedCount} items with ${errorCount} errors. Check console for details.`;
+                    }
+                    
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 5000);
+                    
+                } catch (error) {
+                    console.error('Import error:', error);
+                    const statusDiv = document.getElementById('importStatus');
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.innerHTML = `❌ Error importing file: ${error.message}`;
+                    setTimeout(() => {
+                        statusDiv.style.display = 'none';
+                    }, 5000);
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+            event.target.value = ''; // Reset file input
+        }
+
+        // Helper function to convert Excel date to JS date string
+        function excelDateToJSDate(excelDate) {
+            if (typeof excelDate === 'string') {
+                // Already a string date
+                return excelDate;
+            } else if (typeof excelDate === 'number') {
+                // Excel serial date number
+                const date = new Date((excelDate - 25569) * 86400 * 1000);
+                return date.toISOString().split('T')[0];
+            } else if (excelDate instanceof Date) {
+                return excelDate.toISOString().split('T')[0];
+            }
+            return excelDate;
+        }
+
+        // Export to PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(20);
+            doc.text('Portfolio Manager', 14, 20);
+            doc.setFontSize(12);
+            doc.text('Portfolio Summary Report', 14, 30);
+            doc.text('Generated: ' + new Date().toLocaleDateString('en-IN'), 14, 37);
+            
+            let yPos = 50;
+            
+            // Summary
+            const totalInvested = portfolioData.stock.reduce((sum, s) => sum + s.invested, 0) +
+                                 portfolioData.mfLumpsum.reduce((sum, m) => sum + m.invested, 0) +
+                                 portfolioData.mfSIP.reduce((sum, s) => sum + s.totalInvested, 0) +
+                                 portfolioData.gold.reduce((sum, g) => sum + g.invested, 0) +
+                                 portfolioData.silver.reduce((sum, s) => sum + s.invested, 0) +
+                                 portfolioData.crypto.reduce((sum, c) => sum + c.invested, 0) +
+                                 portfolioData.insurance.reduce((sum, i) => sum + i.invested, 0) +
+                                 portfolioData.fd.reduce((sum, fd) => sum + fd.principal, 0) +
+                                 portfolioData.rd.reduce((sum, rd) => sum + (rd.monthly * rd.tenure), 0);
+            
+            const totalCurrent = portfolioData.stock.reduce((sum, s) => sum + s.current, 0) +
+                                portfolioData.mfLumpsum.reduce((sum, m) => sum + m.current, 0) +
+                                portfolioData.mfSIP.reduce((sum, s) => sum + s.current, 0) +
+                                portfolioData.gold.reduce((sum, g) => sum + g.current, 0) +
+                                portfolioData.silver.reduce((sum, s) => sum + s.current, 0) +
+                                portfolioData.crypto.reduce((sum, c) => sum + c.current, 0) +
+                                portfolioData.insurance.reduce((sum, i) => sum + i.current, 0) +
+                                portfolioData.fd.reduce((sum, fd) => sum + fd.maturityAmount, 0) +
+                                portfolioData.rd.reduce((sum, rd) => sum + rd.maturityAmount, 0);
+            
+            doc.text(`Total Invested: ${formatCurrency(totalInvested)}`, 14, yPos);
+            doc.text(`Current Value: ${formatCurrency(totalCurrent)}`, 14, yPos + 7);
+            doc.text(`Total Profit/Loss: ${formatCurrency(totalCurrent - totalInvested)}`, 14, yPos + 14);
+            
+            yPos += 30;
+            
+            // Add tables for each category (simplified version)
+            if (portfolioData.fd.length > 0) {
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Bank', 'Principal', 'Rate %', 'Maturity Amount']],
+                    body: portfolioData.fd.map(fd => [
+                        fd.bank,
+                        formatCurrency(fd.principal),
+                        fd.rate.toFixed(2) + '%',
+                        formatCurrency(fd.maturityAmount)
+                    ])
+                });
+                yPos = doc.lastAutoTable.finalY + 10;
+            }
+            
+            doc.save('Portfolio_' + new Date().toISOString().split('T')[0] + '.pdf');
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                portfolioData = {
+                    fd: [],
+                    rd: [],
+                    stock: [],
+                    mfLumpsum: [],
+                    mfSIP: [],
+                    gold: [],
+                    silver: [],
+                    crypto: [],
+                    insurance: [],
+                    income: []
+                };
+                saveData();
+                updateAllTables();
+                updateDashboard();
+            }
+        }
+
+        // EDIT FUNCTIONALITY
+        let currentEditType = '';
+        let currentEditIndex = -1;
+
+        // Fixed Deposit Edit
+        function editFD(index) {
+            currentEditType = 'fd';
+            currentEditIndex = index;
+            const fd = portfolioData.fd[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Fixed Deposit';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Bank Name</label>
+                        <input type="text" id="edit_bank" value="${fd.bank}">
+                    </div>
+                    <div class="form-group">
+                        <label>Principal Amount (₹)</label>
+                        <input type="number" id="edit_principal" value="${fd.principal}">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" step="0.01" id="edit_rate" value="${fd.rate}">
+                    </div>
+                    <div class="form-group">
+                        <label>Tenure (Months)</label>
+                        <input type="number" id="edit_tenure" value="${fd.tenure}">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="edit_startDate" value="${fd.startDate}">
+                    </div>
+                    <div class="form-group">
+                        <label>Maturity Amount (₹)</label>
+                        <input type="number" id="edit_maturityAmount" value="${fd.maturityAmount}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Recurring Deposit Edit
+        function editRD(index) {
+            currentEditType = 'rd';
+            currentEditIndex = index;
+            const rd = portfolioData.rd[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Recurring Deposit';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Bank Name</label>
+                        <input type="text" id="edit_bank" value="${rd.bank}">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Deposit (₹)</label>
+                        <input type="number" id="edit_monthly" value="${rd.monthly}">
+                    </div>
+                    <div class="form-group">
+                        <label>Interest Rate (%)</label>
+                        <input type="number" step="0.01" id="edit_rate" value="${rd.rate}">
+                    </div>
+                    <div class="form-group">
+                        <label>Tenure (Months)</label>
+                        <input type="number" id="edit_tenure" value="${rd.tenure}">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="edit_startDate" value="${rd.startDate}">
+                    </div>
+                    <div class="form-group">
+                        <label>Maturity Amount (₹)</label>
+                        <input type="number" id="edit_maturityAmount" value="${rd.maturityAmount}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Stock Edit
+        function editStock(index) {
+            currentEditType = 'stock';
+            currentEditIndex = index;
+            const stock = portfolioData.stock[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Stock';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Stock Name</label>
+                        <input type="text" id="edit_name" value="${stock.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Symbol</label>
+                        <input type="text" id="edit_symbol" value="${stock.symbol}">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="edit_quantity" value="${stock.quantity}">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="edit_invested" value="${stock.invested}">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="edit_current" value="${stock.current}">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="edit_date" value="${stock.date}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // MF Lumpsum Edit
+        function editMFLumpsum(index) {
+            currentEditType = 'mfLumpsum';
+            currentEditIndex = index;
+            const mf = portfolioData.mfLumpsum[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit MF Lumpsum';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Scheme Name</label>
+                        <input type="text" id="edit_name" value="${mf.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="edit_invested" value="${mf.invested}">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="edit_current" value="${mf.current}">
+                    </div>
+                    <div class="form-group">
+                        <label>Investment Date</label>
+                        <input type="date" id="edit_date" value="${mf.date}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // MF SIP Edit
+        function editMFSIP(index) {
+            currentEditType = 'mfSIP';
+            currentEditIndex = index;
+            const sip = portfolioData.mfSIP[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit MF SIP';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Scheme Name</label>
+                        <input type="text" id="edit_name" value="${sip.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly SIP (₹)</label>
+                        <input type="number" id="edit_monthly" value="${sip.monthly}">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Invested (₹)</label>
+                        <input type="number" id="edit_invested" value="${sip.invested}">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="edit_current" value="${sip.current}">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="edit_date" value="${sip.date}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Gold Edit
+        function editGold(index) {
+            currentEditType = 'gold';
+            currentEditIndex = index;
+            const gold = portfolioData.gold[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Gold';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="edit_desc" value="${gold.desc}">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (grams)</label>
+                        <input type="number" step="0.01" id="edit_grams" value="${gold.grams}">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="edit_invested" value="${gold.invested}">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="edit_current" value="${gold.current}">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="edit_date" value="${gold.date}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Silver Edit
+        function editSilver(index) {
+            currentEditType = 'silver';
+            currentEditIndex = index;
+            const silver = portfolioData.silver[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Silver';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="edit_desc" value="${silver.desc}">
+                    </div>
+                    <div class="form-group">
+                        <label>Weight (grams)</label>
+                        <input type="number" step="0.01" id="edit_grams" value="${silver.grams}">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="edit_invested" value="${silver.invested}">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="edit_current" value="${silver.current}">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="edit_date" value="${silver.date}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Crypto Edit
+        function editCrypto(index) {
+            currentEditType = 'crypto';
+            currentEditIndex = index;
+            const crypto = portfolioData.crypto[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Cryptocurrency';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Crypto Name</label>
+                        <input type="text" id="edit_name" value="${crypto.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Symbol</label>
+                        <input type="text" id="edit_symbol" value="${crypto.symbol}">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" step="0.00000001" id="edit_quantity" value="${crypto.quantity}">
+                    </div>
+                    <div class="form-group">
+                        <label>Invested Amount (₹)</label>
+                        <input type="number" id="edit_invested" value="${crypto.invested}">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="edit_current" value="${crypto.current}">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchase Date</label>
+                        <input type="date" id="edit_date" value="${crypto.date}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Insurance Edit
+        function editInsurance(index) {
+            currentEditType = 'insurance';
+            currentEditIndex = index;
+            const insurance = portfolioData.insurance[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Insurance Policy';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Type</label>
+                        <input type="text" id="edit_type" value="${insurance.type}">
+                    </div>
+                    <div class="form-group">
+                        <label>Policy Name</label>
+                        <input type="text" id="edit_name" value="${insurance.name}">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" id="edit_company" value="${insurance.company}">
+                    </div>
+                    <div class="form-group">
+                        <label>Premium Amount (₹)</label>
+                        <input type="number" id="edit_premium" value="${insurance.premium}">
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency</label>
+                        <input type="text" id="edit_frequency" value="${insurance.frequency}">
+                    </div>
+                    <div class="form-group">
+                        <label>Sum Assured (₹)</label>
+                        <input type="number" id="edit_sumAssured" value="${insurance.sumAssured}">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Invested (₹)</label>
+                        <input type="number" id="edit_invested" value="${insurance.invested}">
+                    </div>
+                    <div class="form-group">
+                        <label>Current Value (₹)</label>
+                        <input type="number" id="edit_current" value="${insurance.current}">
+                    </div>
+                    <div class="form-group">
+                        <label>Term (Years)</label>
+                        <input type="number" id="edit_term" value="${insurance.term}">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="edit_startDate" value="${insurance.startDate}">
+                    </div>
+                    <div class="form-group">
+                        <label>Maturity Date</label>
+                        <input type="date" id="edit_maturityDate" value="${insurance.maturityDate}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Income Edit
+        function editIncome(index) {
+            currentEditType = 'income';
+            currentEditIndex = index;
+            const income = portfolioData.income[index];
+            
+            document.getElementById('modalTitle').textContent = 'Edit Income Source';
+            document.getElementById('modalBody').innerHTML = `
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Income Type</label>
+                        <input type="text" id="edit_type" value="${income.type}">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" id="edit_description" value="${income.description}">
+                    </div>
+                    <div class="form-group">
+                        <label>Monthly Amount (₹)</label>
+                        <input type="number" id="edit_monthly" value="${income.monthly}">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" id="edit_date" value="${income.date}">
+                    </div>
+                </div>
+            `;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditType = '';
+            currentEditIndex = -1;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                closeEditModal();
+            }
+        }
+
+        // Save edited data
+        function saveEdit() {
+            if (currentEditType === '' || currentEditIndex === -1) return;
+            
+            const item = portfolioData[currentEditType][currentEditIndex];
+            
+            switch(currentEditType) {
+                case 'fd':
+                    item.bank = document.getElementById('edit_bank').value;
+                    item.principal = parseFloat(document.getElementById('edit_principal').value);
+                    item.rate = parseFloat(document.getElementById('edit_rate').value);
+                    item.tenure = parseInt(document.getElementById('edit_tenure').value);
+                    item.startDate = document.getElementById('edit_startDate').value;
+                    item.maturityAmount = parseFloat(document.getElementById('edit_maturityAmount').value);
+                    item.maturityDate = calculateMaturityDate(item.startDate, item.tenure);
+                    updateFDTable();
+                    break;
+                
+                case 'rd':
+                    item.bank = document.getElementById('edit_bank').value;
+                    item.monthly = parseFloat(document.getElementById('edit_monthly').value);
+                    item.rate = parseFloat(document.getElementById('edit_rate').value);
+                    item.tenure = parseInt(document.getElementById('edit_tenure').value);
+                    item.startDate = document.getElementById('edit_startDate').value;
+                    item.maturityAmount = parseFloat(document.getElementById('edit_maturityAmount').value);
+                    item.maturityDate = calculateMaturityDate(item.startDate, item.tenure);
+                    updateRDTable();
+                    break;
+                
+                case 'stock':
+                    item.name = document.getElementById('edit_name').value;
+                    item.symbol = document.getElementById('edit_symbol').value;
+                    item.quantity = parseFloat(document.getElementById('edit_quantity').value);
+                    item.invested = parseFloat(document.getElementById('edit_invested').value);
+                    item.current = parseFloat(document.getElementById('edit_current').value);
+                    item.date = document.getElementById('edit_date').value;
+                    updateStockTable();
+                    break;
+                
+                case 'mfLumpsum':
+                    item.name = document.getElementById('edit_name').value;
+                    item.invested = parseFloat(document.getElementById('edit_invested').value);
+                    item.current = parseFloat(document.getElementById('edit_current').value);
+                    item.date = document.getElementById('edit_date').value;
+                    updateMFLumpsumTable();
+                    break;
+                
+                case 'mfSIP':
+                    item.name = document.getElementById('edit_name').value;
+                    item.monthly = parseFloat(document.getElementById('edit_monthly').value);
+                    item.invested = parseFloat(document.getElementById('edit_invested').value);
+                    item.current = parseFloat(document.getElementById('edit_current').value);
+                    item.date = document.getElementById('edit_date').value;
+                    updateMFSIPTable();
+                    break;
+                
+                case 'gold':
+                    item.desc = document.getElementById('edit_desc').value;
+                    item.grams = parseFloat(document.getElementById('edit_grams').value);
+                    item.invested = parseFloat(document.getElementById('edit_invested').value);
+                    item.current = parseFloat(document.getElementById('edit_current').value);
+                    item.date = document.getElementById('edit_date').value;
+                    updateGoldTable();
+                    break;
+                
+                case 'silver':
+                    item.desc = document.getElementById('edit_desc').value;
+                    item.grams = parseFloat(document.getElementById('edit_grams').value);
+                    item.invested = parseFloat(document.getElementById('edit_invested').value);
+                    item.current = parseFloat(document.getElementById('edit_current').value);
+                    item.date = document.getElementById('edit_date').value;
+                    updateSilverTable();
+                    break;
+                
+                case 'crypto':
+                    item.name = document.getElementById('edit_name').value;
+                    item.symbol = document.getElementById('edit_symbol').value;
+                    item.quantity = parseFloat(document.getElementById('edit_quantity').value);
+                    item.invested = parseFloat(document.getElementById('edit_invested').value);
+                    item.current = parseFloat(document.getElementById('edit_current').value);
+                    item.date = document.getElementById('edit_date').value;
+                    updateCryptoTable();
+                    break;
+                
+                case 'insurance':
+                    item.type = document.getElementById('edit_type').value;
+                    item.name = document.getElementById('edit_name').value;
+                    item.company = document.getElementById('edit_company').value;
+                    item.premium = parseFloat(document.getElementById('edit_premium').value);
+                    item.frequency = document.getElementById('edit_frequency').value;
+                    item.sumAssured = parseFloat(document.getElementById('edit_sumAssured').value);
+                    item.invested = parseFloat(document.getElementById('edit_invested').value);
+                    item.current = parseFloat(document.getElementById('edit_current').value);
+                    item.term = parseInt(document.getElementById('edit_term').value);
+                    item.startDate = document.getElementById('edit_startDate').value;
+                    item.maturityDate = document.getElementById('edit_maturityDate').value;
+                    updateInsuranceTable();
+                    break;
+                
+                case 'income':
+                    item.type = document.getElementById('edit_type').value;
+                    item.description = document.getElementById('edit_description').value;
+                    item.monthly = parseFloat(document.getElementById('edit_monthly').value);
+                    item.date = document.getElementById('edit_date').value;
+                    updateIncomeTable();
+                    break;
+            }
+            
+            saveData();
+            updateDashboard();
+            closeEditModal();
+        }
+
+        // Initialize
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
