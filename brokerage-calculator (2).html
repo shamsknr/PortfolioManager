@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSE Brokerage Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+<style>
+/* ===== CLEAN LIGHT THEME — HIGH READABILITY ===== */
+:root {
+  --bg: #F0F4F8;
+  --surface: #FFFFFF;
+  --surface2: #F7F9FC;
+  --border: #DDE3EC;
+  --border2: #C8D0DC;
+  --accent: #1A6FE8;
+  --accent-light: #EBF2FF;
+  --accent2: #E05C00;
+  --text: #1A202C;
+  --text2: #3D4A5C;
+  --muted: #7A8799;
+  --green: #0B7B3E;
+  --green-bg: #E8F5EE;
+  --red: #C0392B;
+  --red-bg: #FDECEA;
+  --gold: #B45309;
+  --gold-bg: #FEF3C7;
+  --purple: #6D28D9;
+  --purple-bg: #F5F0FF;
+  --header-bg: #1C2B4A;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.07), 0 2px 8px rgba(0,0,0,.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.05);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ===== HEADER ===== */
+header {
+  background: var(--header-bg);
+  padding: 18px 40px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 12px rgba(0,0,0,.18);
+}
+
+.logo-mark {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800; font-size: 18px;
+  color: #fff; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(29,78,216,.4);
+}
+
+header h1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800; font-size: 20px;
+  color: #FFFFFF;
+  letter-spacing: -.4px;
+}
+
+header p { color: #94A3B8; font-size: 12px; margin-top: 2px; font-weight: 400; }
+
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.badge {
+  background: rgba(59,130,246,.25);
+  border: 1px solid rgba(59,130,246,.4);
+  color: #93C5FD;
+  font-size: 10px; padding: 4px 10px;
+  border-radius: 20px; letter-spacing: 1px; text-transform: uppercase;
+  font-weight: 700;
+}
+
+.export-btns { display: flex; gap: 8px; }
+
+.exp-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 8px; border: 1px solid;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  font-weight: 700; font-size: 11px; letter-spacing: .3px;
+  transition: all .2s; text-transform: uppercase;
+}
+
+.exp-btn.excel {
+  border-color: rgba(34,197,94,.5);
+  color: #16A34A;
+  background: rgba(34,197,94,.12);
+}
+.exp-btn.excel:hover { background: rgba(34,197,94,.22); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(34,197,94,.2); }
+
+.exp-btn.pdf {
+  border-color: rgba(239,68,68,.5);
+  color: #DC2626;
+  background: rgba(239,68,68,.08);
+}
+.exp-btn.pdf:hover { background: rgba(239,68,68,.18); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(239,68,68,.2); }
+
+/* ===== MAIN ===== */
+.main { max-width: 1280px; margin: 0 auto; padding: 28px 40px 50px; }
+
+/* ===== SEGMENT TABS ===== */
+.segment-tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  background: #FFFFFF; padding: 5px;
+  border-radius: 12px; width: fit-content;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.seg-btn {
+  padding: 9px 18px; border: none; border-radius: 8px;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  font-weight: 600; font-size: 13px;
+  transition: all .2s; color: var(--muted); background: transparent;
+}
+.seg-btn:hover:not(.active) { background: var(--surface2); color: var(--text2); }
+.seg-btn.active { background: var(--accent); color: #fff; box-shadow: 0 3px 10px rgba(26,111,232,.3); }
+.seg-btn.active.is-mtf { background: var(--purple); box-shadow: 0 3px 10px rgba(109,40,217,.3); }
+.seg-btn.active.is-slbm { background: #D97706; color: #fff; box-shadow: 0 3px 10px rgba(217,119,6,.3); }
+
+/* ===== INPUT PANEL ===== */
+.input-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 26px;
+  margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.input-panel::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), #60A5FA);
+  border-radius: 14px 14px 0 0;
+}
+.input-panel.mtf-panel::before { background: linear-gradient(90deg, var(--purple), #A78BFA); }
+.input-panel.slbm-panel::before { background: linear-gradient(90deg, #D97706, #F59E0B); }
+
+.panel-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 16px;
+}
+
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.g2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+
+.field label {
+  display: block;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .5px; text-transform: uppercase;
+  color: var(--text2); margin-bottom: 6px;
+}
+
+.field input, .field select {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 13px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 500;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none;
+}
+.field input:hover, .field select:hover { border-color: var(--border2); }
+.field input:focus, .field select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26,111,232,.12);
+  background: #fff;
+}
+.mtf-panel .field input:focus, .mtf-panel .field select:focus {
+  border-color: var(--purple); box-shadow: 0 0 0 3px rgba(109,40,217,.1);
+}
+.slbm-panel .field input:focus, .slbm-panel .field select:focus {
+  border-color: #D97706; box-shadow: 0 0 0 3px rgba(217,119,6,.1);
+}
+.field select option { background: #fff; }
+
+.info-box {
+  background: #F0F6FF;
+  border: 1px solid #C3D9FF;
+  border-radius: 10px;
+  padding: 13px 16px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  color: #3B5680;
+  line-height: 1.75;
+}
+.info-box strong { color: #1A3A60; font-weight: 700; }
+.mtf-panel .info-box { background: #F6F0FF; border-color: #D4BBFF; color: #4B2D7A; }
+.mtf-panel .info-box strong { color: #2D1860; }
+.slbm-panel .info-box { background: #FFFBEB; border-color: #FDE68A; color: #6B4A00; }
+.slbm-panel .info-box strong { color: #3D2A00; }
+
+.calc-btn {
+  border: none; padding: 12px 28px; border-radius: 10px;
+  font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px;
+  cursor: pointer; transition: all .2s; margin-top: 8px;
+  letter-spacing: .2px;
+}
+.calc-btn.default {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 4px 14px rgba(26,111,232,.35);
+}
+.calc-btn.mtf-btn {
+  background: var(--purple); color: #fff;
+  box-shadow: 0 4px 14px rgba(109,40,217,.3);
+}
+.calc-btn.slbm-btn {
+  background: #D97706; color: #fff;
+  box-shadow: 0 4px 14px rgba(217,119,6,.3);
+}
+.calc-btn:hover { transform: translateY(-2px); filter: brightness(1.07); }
+
+/* ===== SUMMARY BAR ===== */
+.summary-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 26px;
+  margin-bottom: 24px;
+  display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+  box-shadow: var(--shadow-sm);
+}
+.sum-item .sum-label {
+  font-size: 11px; color: var(--muted);
+  letter-spacing: .8px; text-transform: uppercase;
+  font-weight: 600; margin-bottom: 4px;
+}
+.sum-item .sum-val {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800; font-size: 20px; color: var(--text);
+}
+.sdiv { width: 1px; height: 36px; background: var(--border); }
+
+/* ===== RESULTS HEADER ===== */
+.results-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.results-header h2 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800; font-size: 17px; color: var(--text);
+}
+
+/* ===== BROKER CARDS ===== */
+.broker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+
+.broker-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 18px;
+  position: relative; overflow: hidden;
+  transition: transform .2s, border-color .2s, box-shadow .2s;
+  box-shadow: var(--shadow-sm);
+}
+.broker-card:hover {
+  transform: translateY(-3px);
+  border-color: #93C5FD;
+  box-shadow: 0 8px 24px rgba(26,111,232,.12);
+}
+.broker-card.cheapest {
+  border-color: #16A34A;
+  box-shadow: 0 0 0 1px #16A34A, 0 8px 24px rgba(22,163,74,.1);
+}
+.broker-card.cheapest::after {
+  content: '🏆 LOWEST';
+  position: absolute; top: 10px; right: 10px;
+  background: #16A34A; color: #fff;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 9px; border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.broker-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.broker-logo {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-weight: 800; font-size: 12px;
+  flex-shrink: 0; color: #fff;
+}
+.broker-name { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); }
+.broker-type { font-size: 11px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+
+.charge-rows { border-top: 1.5px solid var(--border); padding-top: 12px; }
+
+.charge-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 12.5px; }
+.charge-row .lbl { color: var(--text2); font-weight: 500; }
+.charge-row .val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text); font-size: 12px; }
+
+.charge-row.section-head .lbl {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; padding-top: 8px; color: var(--muted);
+}
+.charge-row.section-head.mtf-head .lbl { color: var(--purple); }
+.charge-row.section-head.slbm-head .lbl { color: #D97706; }
+
+.charge-row.total {
+  border-top: 1.5px dashed var(--border2);
+  margin-top: 6px; padding-top: 8px;
+  font-size: 13px;
+}
+.charge-row.total .lbl { font-weight: 700; color: var(--text); font-size: 13px; }
+.charge-row.total .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 15px; color: var(--accent2);
+}
+
+.net-pl {
+  margin-top: 10px; padding: 10px 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.net-pl .lbl { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; }
+.net-pl .val { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; }
+.net-pl .val.profit { color: var(--green); }
+.net-pl .val.loss { color: var(--red); }
+
+.empty-state { text-align: center; padding: 52px 20px; color: var(--muted); }
+.empty-state .icon { font-size: 44px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; color: var(--muted); font-weight: 500; }
+
+/* ===== BROKER LOGO COLORS ===== */
+.z  { background: linear-gradient(135deg, #2563EB, #1E40AF); }
+.u  { background: linear-gradient(135deg, #7C3AED, #5B21B6); }
+.ao { background: linear-gradient(135deg, #EA580C, #9A3412); }
+.f  { background: linear-gradient(135deg, #0891B2, #164E63); }
+.d  { background: linear-gradient(135deg, #16A34A, #14532D); }
+.ab { background: linear-gradient(135deg, #DB2777, #831843); }
+.p  { background: linear-gradient(135deg, #DC2626, #7F1D1D); }
+.g  { background: linear-gradient(135deg, #15803D, #14532D); }
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center;
+  padding: 28px 20px 36px;
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  background: #fff;
+}
+.footer-credit {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 11px 26px;
+  font-size: 13px; color: var(--muted); font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+.footer-credit .name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800; font-size: 15px;
+  color: var(--accent);
+}
+.footer-credit .dot { color: var(--border2); }
+
+/* ===== SECTION DIVIDER BAR ===== */
+.sdiv-bar { display: flex; align-items: center; gap: 10px; margin: 4px 0 16px; }
+.sdiv-bar span {
+  font-size: 11px; font-family: 'Inter', sans-serif;
+  font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px;
+}
+.tag-mtf { background: var(--purple-bg); color: var(--purple); border: 1px solid #C4B5FD; }
+.tag-slbm { background: var(--gold-bg); color: var(--gold); border: 1px solid #FCD34D; }
+.sdiv-bar::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ===== SEGMENT BADGE ===== */
+#segBadge {
+  background: var(--accent-light) !important;
+  border-color: #BFDBFE !important;
+  color: var(--accent) !important;
+  font-weight: 700 !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px) {
+  header { padding: 14px 18px; }
+  header h1 { font-size: 17px; }
+  .main { padding: 16px 18px 32px; }
+  .g4, .g3 { grid-template-columns: 1fr 1fr; }
+  .broker-grid { grid-template-columns: 1fr; }
+  .summary-bar { gap: 16px; }
+  .segment-tabs { width: 100%; }
+  .header-right { width: 100%; }
+}
+@media(max-width:500px) {
+  .g4, .g3, .g2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">₹</div>
+  <div>
+    <h1>NSE Brokerage Calculator</h1>
+    <p>Intraday · Delivery · F&amp;O · MTF · SLBM — 8 Brokers Compared</p>
+  </div>
+  <div class="header-right">
+    <span class="badge">NSE / BSE</span>
+    <div class="export-btns">
+      <button class="exp-btn excel" onclick="exportExcel()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+        Export Excel
+      </button>
+      <button class="exp-btn pdf" onclick="exportPDF()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+        Export PDF
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="main">
+
+  <div class="segment-tabs">
+    <button class="seg-btn active" onclick="setSegment('intraday')">⚡ Intraday</button>
+    <button class="seg-btn" onclick="setSegment('delivery')">📦 Delivery</button>
+    <button class="seg-btn" onclick="setSegment('futures')">📈 Futures</button>
+    <button class="seg-btn" onclick="setSegment('options')">⚙️ Options</button>
+    <button class="seg-btn" onclick="setSegment('mtf')">💳 MTF</button>
+    <button class="seg-btn" onclick="setSegment('slbm')">🔄 SLBM</button>
+  </div>
+
+  <!-- Standard Segment Panel -->
+  <div id="stdPanel" class="input-panel">
+    <div class="panel-title">Trade Details — <span id="segLabelTitle">Intraday</span></div>
+    <div class="g4" style="margin-bottom:12px;">
+      <div class="field">
+        <label>Buy Price (₹)</label>
+        <input type="number" id="buyPrice" value="1500" min="0" step="0.01" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label>Sell Price (₹)</label>
+        <input type="number" id="sellPrice" value="1520" min="0" step="0.01" oninput="calculate()">
+      </div>
+      <div class="field">
+        <label id="qtyLabel">Quantity (Shares)</label>
+        <input type="number" id="qty" value="100" min="1" oninput="calculate()">
+      </div>
+      <div class="field" id="lotField" style="display:none;">
+        <label>Lot Size</label>
+        <input type="number" id="lotSize" value="50" min="1" oninput="calculate()">
+      </div>
+      <div class="field" id="premField" style="display:none;">
+        <label>Option Premium (₹)</label>
+        <input type="number" id="premium" value="25" min="0" step="0.01" oninput="calculate()">
+      </div>
+    </div>
+    <button class="calc-btn default" onclick="calculate()">⚡ Calculate &amp; Compare</button>
+  </div>
+
+  <!-- MTF Panel -->
+  <div id="mtfPanel" class="input-panel mtf-panel" style="display:none;">
+    <div class="sdiv-bar"><span class="tag-mtf">Margin Trading Facility (MTF)</span></div>
+    <div class="info-box">
+      <strong>MTF</strong> lets you buy stocks by paying only a margin, with the broker funding the rest. You pay interest on the funded amount daily until you square off.<br>
+      <strong>Total Cost =</strong> Delivery brokerage + STT + Exchange charges + <em>MTF Interest (annual rate ÷ 365 × days × funded amount)</em> + GST on interest.
+    </div>
+    <div class="g4" style="margin-bottom:12px;">
+      <div class="field"><label>Buy Price (₹)</label><input type="number" id="mtfBuy" value="1500" min="0" step="0.01" oninput="calcMTF()"></div>
+      <div class="field"><label>Sell Price (₹)</label><input type="number" id="mtfSell" value="1550" min="0" step="0.01" oninput="calcMTF()"></div>
+      <div class="field"><label>Quantity (Shares)</label><input type="number" id="mtfQty" value="100" min="1" oninput="calcMTF()"></div>
+      <div class="field"><label>Margin Paid by You (₹)</label><input type="number" id="mtfMargin" value="50000" min="0" oninput="calcMTF()"></div>
+      <div class="field"><label>Holding Period (Days)</label><input type="number" id="mtfDays" value="5" min="1" max="365" oninput="calcMTF()"></div>
+    </div>
+    <button class="calc-btn mtf-btn" onclick="calcMTF()">💳 Calculate MTF Charges</button>
+  </div>
+
+  <!-- SLBM Panel -->
+  <div id="slbmPanel" class="input-panel slbm-panel" style="display:none;">
+    <div class="sdiv-bar"><span class="tag-slbm">Securities Lending &amp; Borrowing Mechanism (SLBM)</span></div>
+    <div class="info-box">
+      <strong>SLBM</strong> lets shareholders lend their securities to earn a lending fee, or borrow securities for short selling.<br>
+      <strong>Lender:</strong> Earns gross income minus platform charges. &nbsp;<strong>Borrower:</strong> Pays lending fee plus platform charges.<br>
+      <strong>Charges:</strong> SLBM Txn Fee (0.10% of transaction value) + GST (18%) + SEBI charges (₹0.10/lakh).
+    </div>
+    <div class="g4" style="margin-bottom:12px;">
+      <div class="field"><label>Stock Price (₹)</label><input type="number" id="slbmPrice" value="2000" min="0" step="0.01" oninput="calcSLBM()"></div>
+      <div class="field"><label>Quantity (Shares)</label><input type="number" id="slbmQty" value="100" min="1" oninput="calcSLBM()"></div>
+      <div class="field"><label>Lending Rate (% p.a.)</label><input type="number" id="slbmRate" value="12" min="0.01" step="0.01" oninput="calcSLBM()"></div>
+      <div class="field"><label>Lending Period (Days)</label><input type="number" id="slbmDays" value="30" min="1" max="365" oninput="calcSLBM()"></div>
+      <div class="field">
+        <label>Role</label>
+        <select id="slbmRole" onchange="calcSLBM()">
+          <option value="lender">Lender (Earn Income)</option>
+          <option value="borrower">Borrower (Pay Fee)</option>
+        </select>
+      </div>
+    </div>
+    <button class="calc-btn slbm-btn" onclick="calcSLBM()">🔄 Calculate SLBM Charges</button>
+  </div>
+
+  <!-- Summary -->
+  <div class="summary-bar" id="summaryBar" style="display:none;">
+    <div class="sum-item"><div class="sum-label">Trade Value</div><div class="sum-val" id="sumTV">—</div></div>
+    <div class="sdiv"></div>
+    <div class="sum-item"><div class="sum-label" id="sumPLLabel">Gross P&amp;L</div><div class="sum-val" id="sumPL">—</div></div>
+    <div class="sdiv"></div>
+    <div class="sum-item"><div class="sum-label">Lowest Charges</div><div class="sum-val" id="sumLow" style="color:var(--green)">—</div></div>
+    <div class="sdiv"></div>
+    <div class="sum-item"><div class="sum-label">Highest Charges</div><div class="sum-val" id="sumHigh" style="color:var(--accent2)">—</div></div>
+    <div class="sdiv"></div>
+    <div class="sum-item"><div class="sum-label">You Save</div><div class="sum-val" id="sumSave" style="color:var(--gold)">—</div></div>
+  </div>
+
+  <div class="results-header">
+    <h2>Broker Comparison</h2>
+    <span id="segBadge" style="font-size:11px;font-family:'Inter',sans-serif;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;border:1px solid;"></span>
+  </div>
+
+  <div class="broker-grid" id="brokerGrid">
+    <div class="empty-state" style="grid-column:1/-1">
+      <div class="icon">📊</div>
+      <p>Enter trade details and click Calculate to compare charges across brokers</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-credit">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--muted)"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    <span>Developed &amp; Designed by</span>
+    <span class="name">Shamsudeen EP</span>
+    <span class="dot">·</span>
+    <span>NSE Brokerage Calculator</span>
+    <span class="dot">·</span>
+    <span id="yr"></span>
+  </div>
+</footer>
+
+<script>
+document.getElementById('yr').textContent = new Date().getFullYear();
+
+let currentSeg = 'intraday';
+let lastResults = [];
+
+const BROKERS = [
+  { id:'zerodha',   name:'Zerodha',    short:'Z',  lc:'z',  type:'Discount',      intraday:{flat:20,pct:.0003}, delivery:{flat:0,pct:0},   futures:{flat:20,pct:.0003}, options:{flat:20,pct:0}, mtfRate:.049, slbmFee:.001 },
+  { id:'upstox',    name:'Upstox',     short:'U',  lc:'u',  type:'Discount',      intraday:{flat:20,pct:.0005}, delivery:{flat:0,pct:0},   futures:{flat:20,pct:.0005}, options:{flat:20,pct:0}, mtfRate:.18,  slbmFee:.001 },
+  { id:'angelone',  name:'Angel One',  short:'A',  lc:'ao', type:'Full Service',  intraday:{flat:20,pct:.0025}, delivery:{flat:0,pct:0},   futures:{flat:25,pct:.00175},options:{flat:25,pct:0}, mtfRate:.18,  slbmFee:.001 },
+  { id:'fyers',     name:'Fyers',      short:'F',  lc:'f',  type:'Discount',      intraday:{flat:20,pct:.0003}, delivery:{flat:0,pct:0},   futures:{flat:20,pct:.0003}, options:{flat:20,pct:0}, mtfRate:.18,  slbmFee:.001 },
+  { id:'dhan',      name:'Dhan',       short:'D',  lc:'d',  type:'Discount',      intraday:{flat:20,pct:.0003}, delivery:{flat:15,pct:0},  futures:{flat:20,pct:.0003}, options:{flat:20,pct:0}, mtfRate:.119, slbmFee:.001 },
+  { id:'aliceblue', name:'Alice Blue', short:'AB', lc:'ab', type:'Discount',      intraday:{flat:15,pct:.0005}, delivery:{flat:0,pct:0},   futures:{flat:15,pct:.0005}, options:{flat:15,pct:0}, mtfRate:.18,  slbmFee:.001 },
+  { id:'5paisa',    name:'5Paisa',     short:'P',  lc:'p',  type:'Discount',      intraday:{flat:10,pct:.0025}, delivery:{flat:10,pct:0},  futures:{flat:10,pct:.0025}, options:{flat:10,pct:0}, mtfRate:.14,  slbmFee:.001 },
+  { id:'groww',     name:'Groww',      short:'G',  lc:'g',  type:'Discount',      intraday:{flat:20,pct:.0005}, delivery:{flat:20,pct:0},  futures:{flat:20,pct:.0005}, options:{flat:20,pct:0}, mtfRate:.18,  slbmFee:.001 },
+];
+
+function setSegment(s) {
+  currentSeg = s;
+  const segs = ['intraday','delivery','futures','options','mtf','slbm'];
+  document.querySelectorAll('.seg-btn').forEach((b,i) => {
+    b.classList.remove('active','is-mtf','is-slbm');
+    if (segs[i]===s) { b.classList.add('active'); if (s==='mtf') b.classList.add('is-mtf'); if (s==='slbm') b.classList.add('is-slbm'); }
+  });
+  document.getElementById('stdPanel').style.display   = ['intraday','delivery','futures','options'].includes(s)?'block':'none';
+  document.getElementById('mtfPanel').style.display   = s==='mtf'?'block':'none';
+  document.getElementById('slbmPanel').style.display  = s==='slbm'?'block':'none';
+  document.getElementById('lotField').style.display   = (s==='futures'||s==='options')?'block':'none';
+  document.getElementById('premField').style.display  = s==='options'?'block':'none';
+  document.getElementById('qtyLabel').textContent     = (s==='futures'||s==='options')?'No. of Lots':'Quantity (Shares)';
+  const titles = {intraday:'Intraday',delivery:'Delivery',futures:'Futures',options:'Options',mtf:'MTF',slbm:'SLBM'};
+  document.getElementById('segLabelTitle').textContent = titles[s]||s;
+  document.getElementById('segBadge').textContent = titles[s]||s;
+  clearGrid();
+  if (s==='mtf') calcMTF(); else if (s==='slbm') calcSLBM(); else calculate();
+}
+
+function clearGrid() {
+  document.getElementById('brokerGrid').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">📊</div><p>Click Calculate to compare charges</p></div>`;
+  document.getElementById('summaryBar').style.display='none';
+  lastResults=[];
+}
+
+function fmt(n) { return '₹'+Math.abs(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function r2(n) { return '₹'+parseFloat(n||0).toFixed(2); }
+
+function calcCharges(b, seg, buyVal, sellVal, qty, premium) {
+  const cfg = b[seg]; let brok = 0;
+  const t = buyVal+sellVal;
+  if (seg==='delivery'&&cfg.flat===0&&cfg.pct===0) brok=0;
+  else if (cfg.flat>0&&cfg.pct>0) brok=Math.min(cfg.flat,buyVal*cfg.pct)+Math.min(cfg.flat,sellVal*cfg.pct);
+  else if (cfg.flat>0) brok=cfg.flat*2;
+  else if (cfg.pct>0) brok=t*cfg.pct;
+  let stt=0;
+  if (seg==='intraday') stt=sellVal*.00025;
+  else if (seg==='delivery') stt=t*.001;
+  else if (seg==='futures') stt=sellVal*.0001;
+  else if (seg==='options') stt=sellVal*.000625;
+  let exc=0;
+  if (seg==='intraday'||seg==='delivery') exc=t*0.0000322;
+  else if (seg==='futures') exc=t*.000019;
+  else if (seg==='options') exc=(premium||0)*qty*2*.0005;
+  const sebi=t*.000001;
+  let stamp=0;
+  if (seg==='intraday') stamp=buyVal*.00003;
+  else if (seg==='delivery') stamp=buyVal*.00015;
+  else if (seg==='futures') stamp=buyVal*.00002;
+  else if (seg==='options') stamp=buyVal*.00003;
+  const gst=(brok+exc)*.18;
+  return {brok,stt,exc,sebi,stamp,gst,total:brok+stt+exc+sebi+stamp+gst};
+}
+
+function calculate() {
+  const buyPrice=parseFloat(document.getElementById('buyPrice').value)||0;
+  const sellPrice=parseFloat(document.getElementById('sellPrice').value)||0;
+  const qty=parseInt(document.getElementById('qty').value)||0;
+  const lotSize=parseInt(document.getElementById('lotSize').value)||1;
+  const premium=parseFloat(document.getElementById('premium').value)||0;
+  const seg=currentSeg;
+  if (!buyPrice||!sellPrice||!qty) { clearGrid(); return; }
+  const isFO=seg==='futures'||seg==='options';
+  const aq=isFO?qty*lotSize:qty;
+  const bv=buyPrice*aq, sv=sellPrice*aq;
+  const gpl=(sellPrice-buyPrice)*aq;
+  const results=BROKERS.map(b=>({...b,charges:calcCharges(b,seg,bv,sv,aq,premium),grossPL:gpl,buyVal:bv}));
+  renderCards(results,bv,gpl,false,null);
+}
+
+function calcMTF() {
+  const buyPrice=parseFloat(document.getElementById('mtfBuy').value)||0;
+  const sellPrice=parseFloat(document.getElementById('mtfSell').value)||0;
+  const qty=parseInt(document.getElementById('mtfQty').value)||0;
+  const margin=parseFloat(document.getElementById('mtfMargin').value)||0;
+  const days=parseInt(document.getElementById('mtfDays').value)||1;
+  if (!buyPrice||!qty) { clearGrid(); return; }
+  const bv=buyPrice*qty, sv=sellPrice*qty, gpl=(sellPrice-buyPrice)*qty;
+  const funded=Math.max(0,bv-margin);
+  const results=BROKERS.map(b=>{
+    const base=calcCharges(b,'delivery',bv,sv,qty,0);
+    const interest=funded*(b.mtfRate/365)*days;
+    const intGST=interest*.18;
+    return {...b,charges:{...base,mtfInterest:interest,mtfGst:intGST,total:base.total+interest+intGST},grossPL:gpl,funded};
+  });
+  renderCards(results,bv,gpl,true,{funded,days});
+}
+
+function calcSLBM() {
+  const price=parseFloat(document.getElementById('slbmPrice').value)||0;
+  const qty=parseInt(document.getElementById('slbmQty').value)||0;
+  const rate=parseFloat(document.getElementById('slbmRate').value)||0;
+  const days=parseInt(document.getElementById('slbmDays').value)||1;
+  const role=document.getElementById('slbmRole').value;
+  if (!price||!qty||!rate) { clearGrid(); return; }
+  const txnVal=price*qty;
+  const gross=txnVal*(rate/100)*(days/365);
+  const results=BROKERS.map(b=>{
+    const fee=txnVal*b.slbmFee, gst=fee*.18, sebi=txnVal*.000001;
+    const total=fee+gst+sebi;
+    return {...b,charges:{slbmFee:fee,gst,sebi,total},grossPL:gross,txnVal,role,gross};
+  });
+  renderSLBM(results,txnVal,gross,rate,days,role);
+}
+
+function renderCards(results,tradeVal,grossPL,isMTF,extra) {
+  const tots=results.map(r=>r.charges.total);
+  const mn=Math.min(...tots),mx=Math.max(...tots);
+  setSummary(tradeVal,grossPL,mn,mx,'Gross P&L');
+  lastResults=results;
+  const cards=results.map(r=>{
+    const c=r.charges, isMin=c.total===mn, netPL=grossPL-c.total;
+    const freeNote=(currentSeg==='delivery'&&r.delivery.flat===0&&r.delivery.pct===0)?`<span style="color:var(--accent);font-size:9px">✓ Zero brokerage</span>`:'';
+    let extra='';
+    if(isMTF) extra=`
+      <div class="charge-row section-head mtf-head"><span class="lbl">▸ MTF Charges</span></div>
+      <div class="charge-row"><span class="lbl">Funded Amount</span><span class="val">${fmt(r.funded)}</span></div>
+      <div class="charge-row"><span class="lbl">Interest Rate</span><span class="val" style="color:var(--purple)">${(r.mtfRate*100).toFixed(1)}% p.a.</span></div>
+      <div class="charge-row"><span class="lbl">MTF Interest</span><span class="val" style="color:var(--purple)">${fmt(c.mtfInterest)}</span></div>
+      <div class="charge-row"><span class="lbl">GST on Interest</span><span class="val">${fmt(c.mtfGst)}</span></div>`;
+    return `<div class="broker-card ${isMin?'cheapest':''}">
+      <div class="broker-header"><div class="broker-logo ${r.lc}">${r.short}</div><div><div class="broker-name">${r.name}</div><div class="broker-type">${r.type} ${freeNote}</div></div></div>
+      <div class="charge-rows">
+        <div class="charge-row"><span class="lbl">Brokerage</span><span class="val">${fmt(c.brok)}</span></div>
+        <div class="charge-row"><span class="lbl">STT</span><span class="val">${fmt(c.stt)}</span></div>
+        <div class="charge-row"><span class="lbl">Exchange Txn Fee</span><span class="val">${fmt(c.exc)}</span></div>
+        <div class="charge-row"><span class="lbl">GST (18%)</span><span class="val">${fmt(c.gst)}</span></div>
+        <div class="charge-row"><span class="lbl">SEBI Charges</span><span class="val">${fmt(c.sebi)}</span></div>
+        <div class="charge-row"><span class="lbl">Stamp Duty</span><span class="val">${fmt(c.stamp||0)}</span></div>
+        ${extra}
+        <div class="charge-row total"><span class="lbl">Total Charges</span><span class="val">${fmt(c.total)}</span></div>
+      </div>
+      <div class="net-pl"><span class="lbl">Net P&amp;L</span><span class="val ${netPL>=0?'profit':'loss'}">${netPL>=0?'+':'-'}${fmt(Math.abs(netPL))}</span></div>
+    </div>`;
+  });
+  document.getElementById('brokerGrid').innerHTML=cards.join('');
+}
+
+function renderSLBM(results,txnVal,gross,rate,days,role) {
+  const tots=results.map(r=>r.charges.total);
+  const mn=Math.min(...tots),mx=Math.max(...tots);
+  document.getElementById('sumPLLabel').textContent=role==='lender'?'Gross Income':'Gross Cost';
+  setSummary(txnVal,gross,mn,mx,role==='lender'?'Gross Income':'Gross Cost');
+  lastResults=results;
+  const cards=results.map(r=>{
+    const c=r.charges, isMin=c.total===mn;
+    const net=role==='lender'?gross-c.total:-(gross+c.total);
+    return `<div class="broker-card ${isMin?'cheapest':''}">
+      <div class="broker-header"><div class="broker-logo ${r.lc}">${r.short}</div><div><div class="broker-name">${r.name}</div><div class="broker-type">${r.type}</div></div></div>
+      <div class="charge-rows">
+        <div class="charge-row section-head slbm-head"><span class="lbl">▸ SLBM Details</span></div>
+        <div class="charge-row"><span class="lbl">Transaction Value</span><span class="val">${fmt(txnVal)}</span></div>
+        <div class="charge-row"><span class="lbl">Lending Rate</span><span class="val">${rate}% p.a.</span></div>
+        <div class="charge-row"><span class="lbl">Period</span><span class="val">${days} days</span></div>
+        <div class="charge-row"><span class="lbl">Gross ${role==='lender'?'Income':'Cost'}</span><span class="val" style="color:${role==='lender'?'var(--green)':'var(--red)'}">${fmt(gross)}</span></div>
+        <div class="charge-row section-head slbm-head"><span class="lbl">▸ Platform Charges</span></div>
+        <div class="charge-row"><span class="lbl">SLBM Txn Fee (0.10%)</span><span class="val">${fmt(c.slbmFee)}</span></div>
+        <div class="charge-row"><span class="lbl">GST (18%)</span><span class="val">${fmt(c.gst)}</span></div>
+        <div class="charge-row"><span class="lbl">SEBI Charges</span><span class="val">${fmt(c.sebi)}</span></div>
+        <div class="charge-row total"><span class="lbl">Total Charges</span><span class="val">${fmt(c.total)}</span></div>
+      </div>
+      <div class="net-pl"><span class="lbl">Net ${role==='lender'?'Income':'Cost'}</span><span class="val ${net>=0?'profit':'loss'}">${net>=0?'+':'-'}${fmt(Math.abs(net))}</span></div>
+    </div>`;
+  });
+  document.getElementById('brokerGrid').innerHTML=cards.join('');
+}
+
+function setSummary(tv,pl,mn,mx,plLabel) {
+  document.getElementById('summaryBar').style.display='flex';
+  document.getElementById('sumTV').textContent=fmt(tv);
+  const el=document.getElementById('sumPL');
+  el.textContent=(pl>=0?'+':'-')+fmt(Math.abs(pl));
+  el.style.color=pl>=0?'var(--green)':'var(--red)';
+  document.getElementById('sumLow').textContent=fmt(mn);
+  document.getElementById('sumHigh').textContent=fmt(mx);
+  document.getElementById('sumSave').textContent=fmt(mx-mn);
+}
+
+/* ===== EXCEL EXPORT ===== */
+function exportExcel() {
+  if (!lastResults.length) { alert('Please calculate first.'); return; }
+  const seg = currentSeg.toUpperCase();
+  const now = new Date().toLocaleString('en-IN');
+  const wb = XLSX.utils.book_new();
+
+  let rows = [
+    ['NSE Brokerage Calculator'],
+    ['Segment: ' + seg],
+    ['Generated: ' + now],
+    ['Developed & Designed by: Shamsudeen EP'],
+    []
+  ];
+
+  if (currentSeg === 'slbm') {
+    rows.push(['Broker','Type','Txn Value (₹)','Lending Rate','Period (Days)','Gross Income/Cost (₹)','SLBM Fee (₹)','GST (₹)','SEBI (₹)','Total Charges (₹)','Net Income/Cost (₹)']);
+    lastResults.forEach(r => {
+      const c=r.charges, gross=r.gross||0;
+      const role=r.role||'lender', net=role==='lender'?gross-c.total:-(gross+c.total);
+      rows.push([r.name,r.type,+(r.txnVal||0).toFixed(2),r.grossPL,r.grossPL,+gross.toFixed(2),+c.slbmFee.toFixed(2),+c.gst.toFixed(2),+c.sebi.toFixed(2),+c.total.toFixed(2),+net.toFixed(2)]);
+    });
+  } else if (currentSeg === 'mtf') {
+    rows.push(['Broker','Type','Funded Amt (₹)','MTF Rate (% p.a.)','MTF Interest (₹)','GST on Interest (₹)','Brokerage (₹)','STT (₹)','Exchange Fee (₹)','GST (₹)','SEBI (₹)','Stamp (₹)','Total Charges (₹)','Gross P&L (₹)','Net P&L (₹)']);
+    lastResults.forEach(r => {
+      const c=r.charges;
+      rows.push([r.name,r.type,+(r.funded||0).toFixed(2),(r.mtfRate*100).toFixed(2),+c.mtfInterest.toFixed(2),+c.mtfGst.toFixed(2),+c.brok.toFixed(2),+c.stt.toFixed(2),+c.exc.toFixed(2),+c.gst.toFixed(2),+c.sebi.toFixed(2),+(c.stamp||0).toFixed(2),+c.total.toFixed(2),+(r.grossPL||0).toFixed(2),+((r.grossPL||0)-c.total).toFixed(2)]);
+    });
+  } else {
+    rows.push(['Broker','Type','Brokerage (₹)','STT (₹)','Exchange Fee (₹)','GST (₹)','SEBI (₹)','Stamp Duty (₹)','Total Charges (₹)','Gross P&L (₹)','Net P&L (₹)']);
+    lastResults.forEach(r => {
+      const c=r.charges;
+      rows.push([r.name,r.type,+c.brok.toFixed(2),+c.stt.toFixed(2),+c.exc.toFixed(2),+c.gst.toFixed(2),+c.sebi.toFixed(2),+(c.stamp||0).toFixed(2),+c.total.toFixed(2),+(r.grossPL||0).toFixed(2),+((r.grossPL||0)-c.total).toFixed(2)]);
+    });
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = Array(15).fill({wch:18});
+  // Merge title cell
+  ws['!merges'] = [{s:{r:0,c:0},e:{r:0,c:7}}];
+  XLSX.utils.book_append_sheet(wb, ws, seg + ' Charges');
+  XLSX.writeFile(wb, 'NSE_Brokerage_' + seg + '_' + Date.now() + '.xlsx');
+}
+
+/* ===== PDF EXPORT ===== */
+function exportPDF() {
+  if (!lastResults.length) { alert('Please calculate first.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const seg = currentSeg.toUpperCase();
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  // Background header bar
+  doc.setFillColor(28,43,74);
+  doc.rect(0,0,pageW,44,'F');
+
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.setTextColor(255,255,255);
+  doc.text('NSE Brokerage Calculator', 14, 15);
+
+  doc.setFontSize(10);
+  doc.setTextColor(148,163,184);
+  doc.text('Segment: ' + seg, 14, 24);
+  doc.text('Generated: ' + new Date().toLocaleString('en-IN'), 14, 31);
+
+  doc.setFontSize(8);
+  doc.setTextColor(100,116,139);
+  doc.text('Developed & Designed by Shamsudeen EP', 14, 38);
+
+  let head=[], body=[];
+
+  if (currentSeg==='slbm') {
+    head=[['Broker','Type','Txn Value','Gross Income/Cost','SLBM Fee','GST','SEBI','Total Charges','Net Income/Cost']];
+    body=lastResults.map(r=>{
+      const c=r.charges, gross=r.gross||0;
+      const role=r.role||'lender', net=role==='lender'?gross-c.total:-(gross+c.total);
+      return [r.name,r.type,r2(r.txnVal||0),r2(gross),r2(c.slbmFee),r2(c.gst),r2(c.sebi),r2(c.total),r2(net)];
+    });
+  } else if (currentSeg==='mtf') {
+    head=[['Broker','Funded Amt','MTF Rate','MTF Interest','Int GST','Brokerage','STT','Exc Fee','GST','SEBI','Stamp','Total','Gross P&L','Net P&L']];
+    body=lastResults.map(r=>{
+      const c=r.charges;
+      return [r.name,r2(r.funded||0),(r.mtfRate*100).toFixed(1)+'%',r2(c.mtfInterest),r2(c.mtfGst),r2(c.brok),r2(c.stt),r2(c.exc),r2(c.gst),r2(c.sebi),r2(c.stamp||0),r2(c.total),r2(r.grossPL||0),r2((r.grossPL||0)-c.total)];
+    });
+  } else {
+    head=[['Broker','Type','Brokerage','STT','Exc Fee','GST','SEBI','Stamp','Total Charges','Gross P&L','Net P&L']];
+    body=lastResults.map(r=>{
+      const c=r.charges;
+      return [r.name,r.type,r2(c.brok),r2(c.stt),r2(c.exc),r2(c.gst),r2(c.sebi),r2(c.stamp||0),r2(c.total),r2(r.grossPL||0),r2((r.grossPL||0)-c.total)];
+    });
+  }
+
+  doc.autoTable({
+    head, body,
+    startY: 48,
+    styles:{fontSize:8,cellPadding:3,font:'helvetica',textColor:[30,40,60]},
+    headStyles:{fillColor:[28,43,74],textColor:[255,255,255],fontStyle:'bold',fontSize:8.5},
+    alternateRowStyles:{fillColor:[247,249,252]},
+    bodyStyles:{fillColor:[255,255,255]},
+    tableLineColor:[221,227,236],
+    tableLineWidth:0.3,
+    margin:{left:12,right:12},
+    didDrawPage:(data)=>{
+      doc.setFontSize(7);
+      doc.setTextColor(122,135,153);
+      doc.text('Developed & Designed by Shamsudeen EP  ·  NSE Brokerage Calculator  ·  All values in INR (₹)', 12, pageH-6);
+      doc.text('Page ' + data.pageNumber, pageW-20, pageH-6);
+    }
+  });
+
+  doc.save('NSE_Brokerage_' + seg + '_' + Date.now() + '.pdf');
+}
+
+// Auto-calculate on load
+calculate();
+</script>
+</body>
+</html>
